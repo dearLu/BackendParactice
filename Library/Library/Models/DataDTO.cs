@@ -69,5 +69,10 @@ namespace Library.Models
             },
 
         };
+
+        /// <summary>
+        /// 2.1.3 - пустой статичный список, отвечающий за хранение этих сущностей(LibraryCard)
+        /// </summary>
+        public static List<LibraryCard> cards = new List<LibraryCard>() { };
     }
 }
