@@ -86,7 +86,7 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddHumanHumanDTO (HumanDTO human)
+        public ActionResult<HumanDTO> AddHumanHumanDTO (HumanDTO human)
         {
             if (human == null)
             {
