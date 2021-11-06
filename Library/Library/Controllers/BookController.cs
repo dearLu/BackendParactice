@@ -73,7 +73,7 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddHumanBookDTO(BookDTO book)
+        public ActionResult<BookDTO> AddHumanBookDTO(BookDTO book)
         {
             if (book == null)
             {
