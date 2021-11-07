@@ -40,6 +40,11 @@ namespace Library.Controllers
             return Ok(card);
         }
 
+        /// <summary>
+        /// 2.1.4 - метод POST отвечающий за взятие книги читателем. На вход - вышеописанный объект
+        /// </summary>
+        /// <param name="card"></param>
+        /// <returns></returns>
 
         [HttpPost]
         [Consumes(MediaTypeNames.Application.Json)]

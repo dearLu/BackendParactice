@@ -39,6 +39,39 @@ namespace Library.Controllers
         }
 
         /// <summary>
+        /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("GetFilterBooksByTitle")]
+        public IEnumerable<BookDTO> GetFilterBooksByTitle()
+        {
+
+            return DataDTO.allBook.OrderBy(e => e.Title).ToList();
+        }
+
+        /// <summary>
+        /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("GetFilterBooksByGenre")]
+        public IEnumerable<BookDTO> GetFilterBooksByGenre()
+        {
+
+            return DataDTO.allBook.OrderBy(e => e.Genre).ToList();
+        }
+
+        /// <summary>
+        /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("GetFilterBooksByAuthor")]
+        public IEnumerable<BookDTO> GetFilterBooksByAuthor()
+        {
+
+            return DataDTO.allBook.OrderBy(e => e.Author).ToList();
+        }
+
+        /// <summary>
         /// 1.4.1.2 - метод Get, возвращающий список всех книг по автору (фильтрация AuthorId)
         /// </summary>
         /// <param name="AuthorId"></param>
@@ -75,7 +108,7 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<BookDTO> AddHumanBookDTO(BookDTO book)
         {
-            if (book == null)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }

@@ -88,7 +88,7 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<HumanDTO> AddHumanHumanDTO (HumanDTO human)
         {
-            if (human == null)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
