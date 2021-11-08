@@ -34,7 +34,6 @@ namespace Library.Controllers
         [HttpGet("GetAllBook")]
         public IEnumerable<BookDTO> GetAllBook()
         {
-
             return DataDTO.allBook;
         }
 

@@ -25,17 +25,17 @@ namespace Library.Models
         [Required(ErrorMessage = "Не указана книга")]
         public BookDTO book { get; set; }
 
-        public DateTimeOffset dateTimeGetBook 
+        /// <summary>
+        /// 2.1.5 - Использовать формат даты и времени yyyy-MM-ddTHH:mm:ss.fffzzz (2021-01-01T16:01:12.257+04:00)
+        /// </summary>
+        public string dateTimeGetBook 
         {
             
             get { return dateTimeGetBook; }
 
             set {
-                    dateTimeGetBook = DateTimeOffset.ParseExact(
-                                        DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz",               CultureInfo.InvariantCulture),
-                                        "yyyy-MM-ddTHH:mm:ss.fffzzz",
-                                        CultureInfo.InvariantCulture,
-                                        DateTimeStyles.None);
+                dateTimeGetBook = DateTimeOffset.Now.ToString("o");
+                                       
                 }        
         }
     }
