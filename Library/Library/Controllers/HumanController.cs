@@ -24,7 +24,6 @@ namespace Library.Controllers
         public HumanController(ILogger<HumanController> logger)
         {
             _logger = logger;
-
         }
 
         /// <summary>
@@ -34,8 +33,7 @@ namespace Library.Controllers
         [HttpGet("GetAll")]
         public IEnumerable<HumanDTO> GetAll()
         {
-
-            return DataDTO.allHuman;
+            return DataDTO.AllHuman;
         }
 
         /// <summary>
@@ -45,8 +43,7 @@ namespace Library.Controllers
         [HttpGet("GetAuthor")]
         public IEnumerable<HumanDTO> GetAuthor()
         {
-
-            return DataDTO.allBook.Select(e=>e.Author).Distinct().ToList();
+            return DataDTO.AllBook.Select(e=>e.Author).Distinct().ToList();
         }
 
         /// <summary>
@@ -55,12 +52,12 @@ namespace Library.Controllers
         /// <param name="filter"></param>
         /// <returns></returns>
         [HttpGet("GetHuman")]
-        public IEnumerable<HumanDTO> GetHuman(string filter)
+        public IEnumerable<HumanDTO> GetHuman([FromRoute] string filter)
         {
 
-            return DataDTO.allHuman.Where(e => e.Name.ToLower() == filter
-                                            || e.Surname.ToLower() == filter
-                                            || e.Patronymic.ToLower() == filter).ToList();
+            return DataDTO.AllHuman.Where(e => e.Name.ToLower() == filter.ToLower()
+                                            || e.Surname.ToLower() == filter.ToLower()
+                                            || e.Patronymic.ToLower() == filter.ToLower()).ToList();
         }
 
         [HttpGet("{id}")]
@@ -68,7 +65,7 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetById(int id)
         {
-            var human = DataDTO.allHuman.Where(e => e.Id == id).FirstOrDefault();
+            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == id);
             if (human == null)
             {
                 return NotFound();
@@ -86,16 +83,9 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<HumanDTO> AddHumanHumanDTO (HumanDTO human)
+        public ActionResult<HumanDTO> AddHumanDTO ([FromBody] HumanDTO human)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            DataDTO.allHuman.Add(human);
-
-
+            DataDTO.AllHuman.Add(human);
             return CreatedAtAction(nameof(GetById), new { id = human.Id }, human);
         }
 
@@ -105,16 +95,16 @@ namespace Library.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public IActionResult DeleteHuman(int id)
+        public IActionResult DeleteHuman([FromRoute] int id)
         {
-            var human = DataDTO.allHuman.Where(e => e.Id == id).FirstOrDefault();
+            var human = DataDTO.AllHuman.Where(e => e.Id == id).FirstOrDefault();
 
             if (human == null)
             {
                 return NotFound();
             }
 
-            DataDTO.allHuman.Remove(human);
+            DataDTO.AllHuman.Remove(human);
 
             return NoContent();
         }

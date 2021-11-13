@@ -24,7 +24,6 @@ namespace Library.Controllers
         public BookController(ILogger<BookController> logger)
         {
             _logger = logger;
-
         }
 
         /// <summary>
@@ -34,40 +33,24 @@ namespace Library.Controllers
         [HttpGet("GetAllBook")]
         public IEnumerable<BookDTO> GetAllBook()
         {
-            return DataDTO.allBook;
+            return DataDTO.AllBook;
         }
 
         /// <summary>
         /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetFilterBooksByTitle")]
-        public IEnumerable<BookDTO> GetFilterBooksByTitle()
+        [HttpGet("GetFilterBooks")]
+        public IEnumerable<BookDTO> GetFilterBooks([FromRoute] bool title = false,bool genre = false)
         {
+           
+            if (title)
+                return DataDTO.AllBook.OrderBy(e => e.Title).ToList();
+            else if(genre)
+                return DataDTO.AllBook.OrderBy(e => e.Genre).ToList();
+            else
+                return DataDTO.AllBook.OrderBy(e => e.Author).ToList();
 
-            return DataDTO.allBook.OrderBy(e => e.Title).ToList();
-        }
-
-        /// <summary>
-        /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetFilterBooksByGenre")]
-        public IEnumerable<BookDTO> GetFilterBooksByGenre()
-        {
-
-            return DataDTO.allBook.OrderBy(e => e.Genre).ToList();
-        }
-
-        /// <summary>
-        /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetFilterBooksByAuthor")]
-        public IEnumerable<BookDTO> GetFilterBooksByAuthor()
-        {
-
-            return DataDTO.allBook.OrderBy(e => e.Author).ToList();
         }
 
         /// <summary>
@@ -76,18 +59,17 @@ namespace Library.Controllers
         /// <param name="AuthorId"></param>
         /// <returns></returns>
         [HttpGet("GetBookByAuthor")]
-        public IEnumerable<BookDTO> GetBookByAuthor(int AuthorId) 
+        public IEnumerable<BookDTO> GetBookByAuthor([FromRoute] int AuthorId) 
         {
-            return DataDTO.allBook.Where(e => e.Author.Id == AuthorId).ToList();
-
+            return DataDTO.AllBook.Where(e => e.Author.Id == AuthorId).ToList();
         }
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BookDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetById(int id)
+        public IActionResult GetById([FromRoute] int id)
         {
-            var book = DataDTO.allBook.Where(e => e.Id == id).FirstOrDefault();
+            var book = DataDTO.AllBook.FirstOrDefault(e => e.Id == id);
             if (book == null)
             {
                 return NotFound();
@@ -105,16 +87,9 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<BookDTO> AddHumanBookDTO(BookDTO book)
+        public ActionResult<BookDTO> AddBookDTO([FromBody] BookDTO book)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            DataDTO.allBook.Add(book);
-
-
+            DataDTO.AllBook.Add(book);
             return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
         }
 
@@ -124,16 +99,16 @@ namespace Library.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public IActionResult DeleteBook(int id)
+        public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = DataDTO.allBook.Where(e => e.Id == id).FirstOrDefault();
+            var book = DataDTO.AllBook.Where(e => e.Id == id).FirstOrDefault();
 
             if (book == null)
             {
                 return NotFound();
             }
 
-            DataDTO.allBook.Remove(book);
+            DataDTO.AllBook.Remove(book);
 
             return NoContent();
         }

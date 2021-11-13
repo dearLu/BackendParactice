@@ -10,7 +10,7 @@ namespace Library.Models
     /// </summary>
     public class DataDTO
     {
-        public static List<HumanDTO> allHuman = new List<HumanDTO>()
+        public static List<HumanDTO> AllHuman = new List<HumanDTO>()
         {
             new HumanDTO
             {
@@ -41,13 +41,13 @@ namespace Library.Models
             }
         };
 
-        public static List<BookDTO> allBook = new List<BookDTO>()
+        public static List<BookDTO> AllBook = new List<BookDTO>()
         {
             new BookDTO
             {
                 Id = 1,
                 Title = "Капитанская дочка",
-                Author = allHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
+                Author = AllHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
                 Genre = "роман" 
 
             },
@@ -55,7 +55,7 @@ namespace Library.Models
             {
                 Id = 2,
                 Title = "Пиковая дама",
-                Author = allHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
+                Author = AllHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
                 Genre = "повесть"
 
             },
@@ -63,7 +63,7 @@ namespace Library.Models
             {
                 Id = 3,
                 Title = "Дубровский",
-                Author = allHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
+                Author = AllHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
                 Genre = "роман"
 
             },
@@ -73,6 +73,6 @@ namespace Library.Models
         /// <summary>
         /// 2.1.3 - пустой статичный список, отвечающий за хранение этих сущностей(LibraryCard)
         /// </summary>
-        public static List<LibraryCard> cards = new List<LibraryCard>() { };
+        public static List<LibraryCard> Cards = new List<LibraryCard>() { };
     }
 }

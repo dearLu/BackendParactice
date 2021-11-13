@@ -20,23 +20,27 @@ namespace Library.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Не указан читатель")]
-        public HumanDTO reader { get; set; }
+        public HumanDTO Reader { get; set; }
 
         [Required(ErrorMessage = "Не указана книга")]
-        public BookDTO book { get; set; }
+        public BookDTO Book { get; set; }
 
         /// <summary>
         /// 2.1.5 - Использовать формат даты и времени yyyy-MM-ddTHH:mm:ss.fffzzz (2021-01-01T16:01:12.257+04:00)
         /// </summary>
-        public string dateTimeGetBook 
+        public string DateTimeGetBook 
         {
             
-            get { return dateTimeGetBook; }
+            get 
+            { 
+                return DateTimeGetBook;
+            }
 
-            set {
-                dateTimeGetBook = DateTimeOffset.Now.ToString("o");
+            set
+            {
+                DateTimeGetBook = DateTimeOffset.Now.ToString("o");
                                        
-                }        
+            }        
         }
     }
 }

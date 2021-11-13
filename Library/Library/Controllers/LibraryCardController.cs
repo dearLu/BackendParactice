@@ -29,9 +29,9 @@ namespace Library.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LibraryCard))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetById(int id)
+        public IActionResult GetById([FromRoute] int id)
         {
-            var card = DataDTO.cards.Where(e => e.Id == id).FirstOrDefault();
+            var card = DataDTO.Cards.Where(e => e.Id == id).FirstOrDefault();
             if (card == null)
             {
                 return NotFound();
@@ -50,19 +50,17 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public  ActionResult<LibraryCard> AddLibraryCard(LibraryCard card)
+        public  ActionResult<LibraryCard> AddLibraryCard([FromBody] LibraryCard card)
         {
             if (card == null)
             {
                 return BadRequest();
             }
 
-            DataDTO.cards.Add(card);
-
+            DataDTO.Cards.Add(card);
 
             return  CreatedAtAction(nameof(GetById), new { id = card.Id }, card);
         }
-
 
     }
 }
