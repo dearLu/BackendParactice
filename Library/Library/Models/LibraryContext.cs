@@ -19,6 +19,11 @@ namespace Library.Models
            // Database.EnsureCreated();
 
         }
+
+        public LibraryContext()
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

@@ -1,116 +1,133 @@
-﻿using Library.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Library.Models;
+using Library.Interfaces;
+using Library.Services;
+using AutoMapper;
 
 namespace Library.Controllers
 {
-    /// <summary>
-    /// 1.4 - Контроллер, который отвечает за книгу
-    /// </summary>
-    [Produces("application/json")]
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class BookController : ControllerBase
     {
-
-        private readonly ILogger<BookController> _logger;
-
-        public BookController(ILogger<BookController> logger)
+        private readonly  IRepository<Book> repo;
+        private readonly IMapper _mapper;
+        public BookController(IMapper mapper)
         {
-            _logger = logger;
-        }
-
-        /// <summary>
-        /// 1.4.1.1 - метод Get, возвращающий список всех книг
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetAllBook")]
-        public IEnumerable<BookDTO> GetAllBook()
-        {
-            return DataDTO.AllBook;
-        }
-
-        /// <summary>
-        /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetFilterBooks")]
-        public IEnumerable<BookDTO> GetFilterBooks([FromRoute] bool title = false,bool genre = false)
-        {
-           
-            if (title)
-                return DataDTO.AllBook.OrderBy(e => e.Title).ToList();
-            else if(genre)
-                return DataDTO.AllBook.OrderBy(e => e.Genre).ToList();
-            else
-                return DataDTO.AllBook.OrderBy(e => e.Author).ToList();
+            repo = new BookRepository();
+            _mapper = mapper;
 
         }
 
-        /// <summary>
-        /// 1.4.1.2 - метод Get, возвращающий список всех книг по автору (фильтрация AuthorId)
-        /// </summary>
-        /// <param name="AuthorId"></param>
-        /// <returns></returns>
-        [HttpGet("GetBookByAuthor")]
-        public IEnumerable<BookDTO> GetBookByAuthor([FromRoute] int AuthorId) 
+        // GET: api/Book
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
-            return DataDTO.AllBook.Where(e => e.Author.Id == AuthorId).ToList();
+            return await _context.Books.ToListAsync();
         }
 
+        // GET: api/Book/5
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BookDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<ActionResult<Book>> GetBook(int id)
         {
-            var book = DataDTO.AllBook.FirstOrDefault(e => e.Id == id);
+            var book = await _context.Books.FindAsync(id);
+
             if (book == null)
             {
                 return NotFound();
             }
 
-            return Ok(book);
+            return book;
+        }
+
+        // PUT: api/Book/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutBook(int id, BookDTO book)
+        {
+            if (id != book.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(book).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BookExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
         /// <summary>
-        /// 1.4.2 - метод POST, добавляющий новую книгу
+        /// 7.2.1.	Книга может быть добавлена (POST) (вместе с автором и жанром) книга + автор + жанр
         /// </summary>
         /// <param name="book"></param>
         /// <returns></returns>
+        // POST: api/Book
         [HttpPost]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<BookDTO> AddBookDTO([FromBody] BookDTO book)
+        public async Task<ActionResult<Book>> AddBook(Book book)
         {
-            DataDTO.AllBook.Add(book);
-            return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
+            _context.Books.Add(book);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("AddBook", new { id = book.Id }, book);
         }
 
         /// <summary>
-        /// 1.4.3 - метод DELETE, удаляющий книгу
+        /// 7.2.2.	Книга может быть удалена из списка библиотеки (но только если она не у пользователя) по ID (ок, или
+        /// ошибка, что книга у пользователя)
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        // DELETE: api/Book/5
         [HttpDelete("{id}")]
-        public IActionResult DeleteBook([FromRoute] int id)
+        public async Task<IActionResult> DeleteBook(int id)
         {
-            var book = DataDTO.AllBook.Where(e => e.Id == id).FirstOrDefault();
-
+            var book = await _context.Books.FindAsync(id);
             if (book == null)
             {
                 return NotFound();
             }
 
-            DataDTO.AllBook.Remove(book);
+            if (!FindPersonWithThisBook(id))
+            {
+                _context.Books.Remove(book);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return  Content($"Книга {book.Name} уже у пользователя. Невозможно удалить");              
+            }
 
-            return NoContent();
+             return Ok();
+        }
+
+        private bool BookExists(int id)
+        {
+            return _context.Books.Any(e => e.Id == id);
+        }
+        private bool FindPersonWithThisBook(int id) 
+        {
+            return _context.Persons.Any(e => e.Books.Any(q => e.Id == id));
         }
     }
 }

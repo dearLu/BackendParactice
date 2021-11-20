@@ -1,3 +1,4 @@
+using AutoMapper;
 using Library.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Library
@@ -31,6 +33,9 @@ namespace Library
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<LibraryContext>(options => options.UseSqlServer(connection));
+            //services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(typeof(Startup));
+            services.AddMvc();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

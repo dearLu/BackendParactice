@@ -16,12 +16,12 @@ namespace Library.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("api/[controller]")]
-    public class HumanController : ControllerBase
+    public class HumanDTOController : ControllerBase
     {
      
-        private readonly ILogger<HumanController> _logger;
+        private readonly ILogger<HumanDTOController> _logger;
 
-        public HumanController(ILogger<HumanController> logger)
+        public HumanDTOController(ILogger<HumanDTOController> logger)
         {
             _logger = logger;
         }
