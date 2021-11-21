@@ -36,15 +36,6 @@ namespace Library.Controllers
             return DataDTO.AllHuman;
         }
 
-        /// <summary>
-        /// 1.3.1.2 - метод Get, возвращающий список людей, которые пишут книги
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetAuthor")]
-        public IEnumerable<HumanDTO> GetAuthor()
-        {
-            return DataDTO.AllBook.Select(e=>e.Author).Distinct().ToList();
-        }
 
         /// <summary>
         /// 1.3.1.3 - Поиск людей, в имени, фамилии или отчестве которых содержится поисковая фраза

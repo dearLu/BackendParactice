@@ -28,12 +28,14 @@ namespace Library
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// 2.4	Получать строку подключения к базе данных из файла конфигурации (никакого хардкода)
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<LibraryContext>(options => options.UseSqlServer(connection));
-            //services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddDbContext<LibraryContext>(options => options.UseSqlServer(connection));            
             services.AddAutoMapper(typeof(Startup));
             services.AddMvc();
             services.AddControllers();

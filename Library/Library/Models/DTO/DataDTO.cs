@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Library.Models;
+using Library.Models.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +12,7 @@ namespace Library.Models
     /// </summary>
     public class DataDTO
     {
+
         public static List<HumanDTO> AllHuman = new List<HumanDTO>()
         {
             new HumanDTO
@@ -23,15 +26,6 @@ namespace Library.Models
             },
             new HumanDTO
             {
-                Id = 2,
-                Name = "Александр",
-                Surname = "Пушкин",
-                Patronymic = "Сергеевич",
-                Birthday = new DateTime(1799, 6, 6)
-
-            },
-            new HumanDTO
-            {
                 Id = 3,
                 Name = "Александр",
                 Surname = "Александров",
@@ -40,31 +34,61 @@ namespace Library.Models
 
             }
         };
+        public static List<AuthorDTO> AllAuthor = new List<AuthorDTO>()
+        {
+            new AuthorDTO
+            {
+                Id = 2,
+                FirstName = "Александр",
+                LastName = "Пушкин",
+                MiddleName = "Сергеевич",
+                Books = AllBook,
 
+            }
+        };
+
+        public static List<GenreDTO> AllGenres = new List<GenreDTO>()
+        {
+            new GenreDTO
+            {
+                Id = 1,
+                GenreName = "роман",
+                Books= AllBook.Where(e=>e.Genres.Any(e=>e.GenreName == "роман")).ToList()
+
+            },
+            new GenreDTO
+            {
+                Id = 2,
+                GenreName = "повесть",
+                Books= AllBook.Where(e=>e.Genres.Any(e=>e.GenreName == "повесть")).ToList()
+
+            },
+
+        };
         public static List<BookDTO> AllBook = new List<BookDTO>()
         {
             new BookDTO
             {
                 Id = 1,
                 Title = "Капитанская дочка",
-                Author = AllHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
-                Genre = "роман" 
+                Author = AllAuthor.Where(e=> e.LastName == "Пушкин").FirstOrDefault(),
+                Genres = AllGenres.Where(e=>e.Id == 1).ToList(),
 
             },
             new BookDTO
             {
                 Id = 2,
                 Title = "Пиковая дама",
-                Author = AllHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
-                Genre = "повесть"
+                Author = AllAuthor.Where(e=> e.LastName == "Пушкин").FirstOrDefault(),
+                Genres = AllGenres.Where(e=>e.Id == 2).ToList(),
 
             },
             new BookDTO
             {
                 Id = 3,
                 Title = "Дубровский",
-                Author = AllHuman.Where(e=> e.Surname == "Пушкин").FirstOrDefault(),
-                Genre = "роман"
+                Author = AllAuthor.Where(e=> e.LastName == "Пушкин").FirstOrDefault(),
+                Genres = AllGenres.Where(e => e.Id == 1).ToList(),
 
             },
 

@@ -8,15 +8,16 @@ namespace Library.Models
 {
     public class LibraryContext: DbContext
     {
+        /// <summary>
+        /// 2.6	Реализовать репозитории под все сущности кроме референсных 
+        /// </summary>
         public DbSet<Author> Authors { get; set; }
         public DbSet<Genre> Genres { get; set; }
-        public DbSet<Book> Books { get; set; }
-        
+        public DbSet<Book> Books { get; set; }       
         public DbSet<Person> Persons { get; set; }
         public LibraryContext(DbContextOptions<LibraryContext> options)
             : base(options)
         {
-           // Database.EnsureCreated();
 
         }
 
@@ -24,10 +25,13 @@ namespace Library.Models
         {
         }
 
+        /// <summary>
+        /// 2.3	Реализовать все связи между таблицами, которые присутствуют в схеме. (использовать при этом только 
+        /// fluentAPI)
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-
             modelBuilder.Entity<Book>()
             .HasOne(p => p.Author)
             .WithMany(p => p.Books)

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Library.Models;
+using Library.Models.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,6 @@ namespace Library.Services
 	{
 		public LibraryProfile()
 		{
-			CreateMap<Book, BookDTO>().ReverseMap();
 			CreateMap<Person, HumanDTO>()
 				.ForMember(dest =>
 					dest.Id,
@@ -29,6 +29,44 @@ namespace Library.Services
 					dest.Birthday,
 					opt => opt.MapFrom(src => src.BirthDate))
 				.ReverseMap();
+
+			CreateMap<Genre, GenreDTO>()
+				.ForMember(dest =>
+					dest.Id,
+					opt => opt.MapFrom(src => src.Id))
+				.ForMember(dest =>
+					dest.GenreName,
+					opt => opt.MapFrom(src => src.GenreName))
+				.ReverseMap();
+
+			CreateMap<Author, AuthorDTO>()
+				.ForMember(dest =>
+					dest.Id,
+					opt => opt.MapFrom(src => src.Id))
+				.ForMember(dest =>
+					dest.FirstName,
+					opt => opt.MapFrom(src => src.FirstName))
+				.ForMember(dest =>
+					dest.LastName,
+					opt => opt.MapFrom(src => src.LastName))
+				.ForMember(dest =>
+					dest.MiddleName,
+					opt => opt.MapFrom(src => src.MiddleName))
+				.ReverseMap();
+
+			CreateMap<Book, BookDTO>()
+				.ForMember(dest =>
+					dest.Id,
+					opt => opt.MapFrom(src => src.Id))
+				.ForMember(dest =>
+					dest.Title,
+					opt => opt.MapFrom(src => src.Name))
+				.ForMember(dest =>
+					dest.Author,
+					opt => opt.MapFrom(src => src.Author))
+				.ReverseMap();
+
+
 		}
 	}
 }

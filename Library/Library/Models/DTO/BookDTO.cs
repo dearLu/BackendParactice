@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Library.Models.DTO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -21,10 +22,13 @@ namespace Library.Models
         public string Title { get; set; }
 
         [Required(ErrorMessage = "Не указан автор")]
-        public HumanDTO Author { get; set; }
+        public AuthorDTO Author { get; set; }
 
         [Required(ErrorMessage = "Не указан жанр")]
-        public string Genre { get; set; }
-    
+      
+        public  List<GenreDTO> Genres { get; set; }
+       
+        public  List<HumanDTO> Persons { get; set; }
+
     }
 }

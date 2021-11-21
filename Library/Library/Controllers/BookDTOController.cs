@@ -47,7 +47,7 @@ namespace Library.Controllers
             if (title)
                 return DataDTO.AllBook.OrderBy(e => e.Title).ToList();
             else if(genre)
-                return DataDTO.AllBook.OrderBy(e => e.Genre).ToList();
+                return DataDTO.AllBook.OrderBy(e => e.Genres).ToList();
             else
                 return DataDTO.AllBook.OrderBy(e => e.Author).ToList();
 

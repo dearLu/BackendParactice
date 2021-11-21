@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Library.Models;
 using Library.Services;
 using AutoMapper;
-using Library.Interfaces;
+using Library.Models.DTO;
 
 namespace Library.Controllers
 {
@@ -16,52 +16,42 @@ namespace Library.Controllers
     [ApiController]
     public class PersonController : ControllerBase
     {
-        private readonly IRepository<Person> repo;
+        private UnitOfWork unitOfWork = new UnitOfWork();
         private readonly IMapper _mapper;
-        public PersonController(IMapper mapper,)
+        public PersonController(IMapper mapper)
         {
-            repo = new PersonRepository();
             _mapper = mapper;
-
-        }
-
-        // GET: api/Person
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
-        {
-            return await _context.Persons.ToListAsync();
-        }
-
-        // GET: api/Person/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
-        {
-            var person = await _context.Persons.FindAsync(id);
-
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            return person;
         }
 
         /// <summary>
-        ///  7.1.2.	Информация о пользователе может быть изменена (PUT) (вернуть пользователя)
+        /// 2.7.1.1 - Пользователь может быть добавлен
+        /// </summary>
+        /// <param name="human"></param>
+        /// <returns></returns>
+        // POST: api/Person
+        [HttpPost]
+        public ActionResult<Person> AddPerson([FromBody] HumanDTO human)
+        {
+            Person person = _mapper.Map<Person>(human);
+            unitOfWork.PersonRepository.Insert(person);
+            unitOfWork.Save();
+            return CreatedAtAction("AddPerson", new { id = person.Id }, person);
+        }
+
+        /// <summary>
+        /// 2.7.1.2.	Информация о пользователе может быть изменена (PUT) (вернуть пользователя)
         /// </summary>
         /// <param name="human"></param>
         /// <returns></returns>
         // PUT: api/Person/5
         [HttpPut]
-        public async Task<ActionResult<Person>> PutPerson(HumanDTO human)
+        public ActionResult<Person> UpdatePerson([FromBody] HumanDTO human)
         {
             Person person = _mapper.Map<Person>(human);
-            repo.Update(person);
-
             try
             {
-                 repo.Update(person);
-                
+                unitOfWork.PersonRepository.Update(person);
+
             }
             catch (Exception ex)
             {
@@ -69,28 +59,15 @@ namespace Library.Controllers
 
             }
 
-            repo.Save();
+            unitOfWork.Save();
 
-            return CreatedAtAction("GetPerson", new { id = person.Id }, person);
+            return CreatedAtAction("UpdatePerson", new { id = person.Id }, person);
         }
 
-        /// <summary>
-        /// 7.1.1 - Пользователь может быть добавлен
-        /// </summary>
-        /// <param name="human"></param>
-        /// <returns></returns>
-        // POST: api/Person
-        [HttpPost]
-        public async Task<ActionResult<Person>> PostPerson([FromBody] HumanDTO human)
-        {
-            Person person = _mapper.Map<Person>(human);
-            repo.Create(person);
-            repo.Save();
-            return CreatedAtAction("GetPerson", new { id = person.Id }, person);
-        }
+
 
         /// <summary>
-        /// 7.1.3.	Пользователь может быть удалён по ID (DELETE) (ок или ошибку, если такого id нет)
+        /// 2.7.1.3. Пользователь может быть удалён по ID (DELETE) (ок или ошибку, если такого id нет)
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -112,35 +89,42 @@ namespace Library.Controllers
             {
                 return NotFound();
             }
-            
-            repo.Delete(person.Id);
-            repo.Save();
+
+            unitOfWork.PersonRepository.Delete(person.Id);
+            unitOfWork.Save();
 
             return Ok();
         }
 
         /// <summary>
-        /// 7.1.4.	Пользователь или пользователи могут быть удалены по ФИО (не заботясь о том что могут быть полные 
+        /// 2.7.1.4. Пользователь или пользователи могут быть удалены по ФИО (не заботясь о том что могут быть полные 
         /// тёзки. Без пощады.) (DELETE) Ok - или ошибку, если что-то пошло не так. 
         /// </summary>
         /// <param name="human"></param>
         /// <returns></returns>
         [HttpDelete("DeletePersonByName")]
-        public IActionResult DeletePersonByName(HumanDTO human )
+        public IActionResult DeletePersonByName([FromBody] HumanDTO human )
         {
-            var listPersons = repo.GetList().ToList().Where(e => e.FirstName == human.Name
-                                            && e.LastName == human.Surname
-                                            && e.MiddleName == human.Patronymic)
+            if (human == null)
+            {
+                return NotFound();
+            }
+
+            Person person = _mapper.Map<Person>(human);
+
+            var listPersons = unitOfWork.PersonRepository.Get().ToList().Where(e => e.FirstName == person.FirstName
+                                            && e.LastName == person.LastName
+                                            && e.MiddleName == person.MiddleName)
                                             .ToList();
 
             if (listPersons.Count() > 0)
             {
-                foreach (var person in listPersons)
+                foreach (var p in listPersons)
                 {
-                    repo.Delete(person.Id);
+                    unitOfWork.PersonRepository.Delete(p.Id);
                 }
 
-                repo.Save();
+                unitOfWork.Save();
             }
             else 
             {
@@ -152,64 +136,86 @@ namespace Library.Controllers
 
 
         /// <summary>
-        /// 7.1.6.	Пользователь может взять книгу (добавить в список книг пользователя книгу)  Пользователь + книги
+        /// 2.7.1.5. Получить список всех взятых пользователем книг (GET) в качестве параметра поиска - ID пользователя.
+        /// Полное дерево: Книги - автор - жанр
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        [HttpGet("GetListBook")]
+        public List<AuthorBooksGenresDTO> GetListBook([FromRoute] int Id) 
+        {
+            List<AuthorBooksGenresDTO> listBooks = new();
+            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == Id);         
+
+            Person person = _mapper.Map<Person>(human);
+
+            var books = unitOfWork.BookRepository.Get(includeProperties: "Author,Genre")
+                                                            .ToList()
+                                                            .Where(e => e.Persons.Any(q=>q.Id == person.Id))
+                                                            .ToList();
+            foreach (var book in books)
+            {
+                listBooks.Add(new AuthorBooksGenresDTO
+                {
+                    Author = _mapper.Map<AuthorDTO>(book.Author),
+                    Book = _mapper.Map<BookDTO>(book),
+                    Genre = (List<GenreDTO>)_mapper.Map<IEnumerable<GenreDTO>>(book.Genres)
+                });
+
+            }
+
+            return listBooks;
+
+        }
+
+        /// <summary>
+        /// 2.7.1.6.	Пользователь может взять книгу (добавить в список книг пользователя книгу)  Пользователь + книги
         /// </summary>
         /// <param name="id"></param>
         /// <param name="book"></param>
         /// <returns></returns>
 
         [HttpPut("PutBookForPerson")]
-        public async Task<IActionResult> PutBookForPerson( int id, Book book)
+        public PersonBooks PutBookForPerson(int id, BookDTO bookDTO)
         {
-            if (!PersonExists(id))
-            {
-                return BadRequest();
-            }
 
-            Person person = await _context.Persons.FindAsync(id);           
+            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == id);
+
+            Person person = _mapper.Map<Person>(human);
+            Book book = _mapper.Map<Book>(bookDTO);
 
             person.Books.Add(book);
+            unitOfWork.PersonRepository.Update(person);
+            unitOfWork.Save();
 
-            _context.Entry(person).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return Ok();
+            PersonBooks obj = new();
+            obj.Human = _mapper.Map<HumanDTO>(person);
+            obj.Books = (List<BookDTO>)_mapper.Map<IEnumerable<BookDTO>>(person.Books);
+            return obj;
         }
 
+        /// <summary>
+        /// 2.7.1.7.	Пользователь может вернуть книгу (удалить из списка книг пользователя книгу) пользователь + книги
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="bookDTO"></param>
+        /// <returns></returns>
         [HttpDelete("ReturnBook")]
-        public async Task<IActionResult> ReturnBook( int id, Book book)
+        public PersonBooks ReturnBook( int id, BookDTO bookDTO)
         {
-            var person = await _context.Persons.FirstOrDefaultAsync(e => e.Id == id);
-            if (person == null)
-            {
-                return NotFound();
-            }
-            if (person.Books.Where(e => e.Id==book.Id).Count() == 0)
-            {
-                return NotFound();
-            }    
+            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == id);
+
+            Person person = _mapper.Map<Person>(human);
+            Book book = _mapper.Map<Book>(bookDTO);
 
             person.Books.Remove(book);
+            unitOfWork.PersonRepository.Update(person);
+            unitOfWork.Save();
 
-            _context.Entry(person).State = EntityState.Modified;
-
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            PersonBooks obj = new();
+            obj.Human = _mapper.Map<HumanDTO>(person);
+            obj.Books = (List<BookDTO>)_mapper.Map<IEnumerable<BookDTO>>(person.Books);
+            return obj;
         }
 
 
