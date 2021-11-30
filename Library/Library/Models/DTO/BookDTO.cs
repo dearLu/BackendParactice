@@ -10,7 +10,7 @@ namespace Library.Models
     /// <summary>
     /// 1.2.2 - Класс книги
     /// </summary>
-    public class BookDTO
+    public class BookDto
     {
         /// <summary>
         /// 2.2.1 - Добавьте валидации в ваши сущности: все обязательные поля должны быть NotNull. 
@@ -22,13 +22,13 @@ namespace Library.Models
         public string Title { get; set; }
 
         [Required(ErrorMessage = "Не указан автор")]
-        public AuthorDTO Author { get; set; }
+        public AuthorDto Author { get; set; }
 
         [Required(ErrorMessage = "Не указан жанр")]
       
-        public  List<GenreDTO> Genres { get; set; }
+        public  List<GenreDto> Genres { get; set; }
        
-        public  List<HumanDTO> Persons { get; set; }
+        public  List<HumanDto> Persons { get; set; }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using Library.Models;
+﻿using Library.Interfaces;
+using Library.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,13 +17,14 @@ namespace Library.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("api/[controller]")]
-    public class HumanDTOController : ControllerBase
+    public class HumanDtoController : ControllerBase
     {
-     
-        private readonly ILogger<HumanDTOController> _logger;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly ILogger<HumanDtoController> _logger;
 
-        public HumanDTOController(ILogger<HumanDTOController> logger)
+        public HumanDtoController(ILogger<HumanDtoController> logger, IUnitOfWork unitOfWork)
         {
+            this.unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -30,8 +32,8 @@ namespace Library.Controllers
         /// 1.3.1.1 - метод Get, возвращающий список всех людей
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetAll")]
-        public IEnumerable<HumanDTO> GetAll()
+        [HttpGet("getAll")]
+        public IEnumerable<HumanDto> GetAll()
         {
             return DataDTO.AllHuman;
         }
@@ -42,8 +44,8 @@ namespace Library.Controllers
         /// </summary>
         /// <param name="filter"></param>
         /// <returns></returns>
-        [HttpGet("GetHuman")]
-        public IEnumerable<HumanDTO> GetHuman([FromRoute] string filter)
+        [HttpGet("getHuman")]
+        public IEnumerable<HumanDto> GetHuman([FromRoute] string filter)
         {
 
             return DataDTO.AllHuman.Where(e => e.Name.ToLower() == filter.ToLower()
@@ -52,7 +54,7 @@ namespace Library.Controllers
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(HumanDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(HumanDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetById(int id)
         {
@@ -74,7 +76,7 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<HumanDTO> AddHumanDTO ([FromBody] HumanDTO human)
+        public ActionResult<HumanDto> AddHumanDTO ([FromBody] HumanDto human)
         {
             DataDTO.AllHuman.Add(human);
             return CreatedAtAction(nameof(GetById), new { id = human.Id }, human);

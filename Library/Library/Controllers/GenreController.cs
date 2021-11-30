@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Library.Interfaces;
 using Library.Models;
 using Library.Models.DTO;
 using Library.Services;
@@ -15,10 +16,11 @@ namespace Library.Controllers
     [ApiController]
     public class GenreController : ControllerBase
     {
-        private UnitOfWork unitOfWork = new UnitOfWork();
+        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper _mapper;
-        public GenreController(IMapper mapper)
-        {           
+        public GenreController(IMapper mapper, IUnitOfWork unitOfWork)
+        {
+            this.unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -26,10 +28,10 @@ namespace Library.Controllers
         /// 2.7.4.1.	Просмотр всех жанров. (без книг) 
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetAllGenres")]
-        public List<GenreDTO> GetAllGenres()
+        [HttpGet("getAllGenres")]
+        public List<GenreDto> GetAllGenres()
         {
-            return (List<GenreDTO>)_mapper.Map<IEnumerable<GenreDTO>>(unitOfWork.GenreRepository.Get().ToList());
+            return _mapper.Map<List<GenreDto>>(unitOfWork.GetRepository<Genre>().Get());
         }
 
         /// <summary>
@@ -38,10 +40,10 @@ namespace Library.Controllers
         /// <param name="genreDTO"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult<Genre> AddGenre([FromBody] GenreDTO genreDTO)
+        public ActionResult<Genre> AddGenre([FromBody] GenreDto genreDTO)
         {
             Genre genre = _mapper.Map<Genre>(genreDTO);
-            unitOfWork.GenreRepository.Insert(genre);
+            unitOfWork.GetRepository<Genre>().Insert(genre);
             unitOfWork.Save();
             return CreatedAtAction("AddGenre", new { id = genre.Id }, genre);
         }
@@ -50,28 +52,23 @@ namespace Library.Controllers
         /// 2.7.4.3.	Вывод статистики Жанр - количество книг
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetStatictic")]
-        public List<StatisticGenreDTO> GetStatictic()
+        [HttpGet("getStatictic")]
+        public List<StatisticGenreDto> GetStatictic()
         {
-            List<StatisticGenreDTO> statistic = new();
-            var genres = (List<GenreDTO>)_mapper.Map<IEnumerable<GenreDTO>>(unitOfWork.GenreRepository
-                                                .Get(includeProperties: "Book")
-                                                .ToList());
+            List<StatisticGenreDto> statistic = new();
+            var genres = _mapper.Map<List<GenreDto>>(unitOfWork.GetRepository<Genre>()
+                                                .Get(includeProperties: "Book"));
+
             foreach (var genre in genres)
             {
-                statistic.Add(new StatisticGenreDTO
+                statistic.Add(new StatisticGenreDto
                 {
                     GenreName = genre.GenreName,
                     Count = genre.Books.Count()
 
                 });
-
-
             }
-
             return statistic;
         }
-
-
     }
 }

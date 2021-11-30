@@ -9,6 +9,7 @@ using Library.Models;
 using Library.Services;
 using AutoMapper;
 using Library.Models.DTO;
+using Library.Interfaces;
 
 namespace Library.Controllers
 {
@@ -16,10 +17,11 @@ namespace Library.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private UnitOfWork unitOfWork = new UnitOfWork();
+        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper _mapper;
-        public BookController(IMapper mapper)
+        public BookController(IMapper mapper, IUnitOfWork unitOfWork)
         {
+            this.unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -30,12 +32,12 @@ namespace Library.Controllers
         /// <returns></returns>
         // POST: api/Book
         [HttpPost]
-        public ActionResult<Book> AddBook([FromBody] BookDTO bookDTO)
+        public ActionResult<Book> AddBook([FromBody] BookDto bookDTO)
         {
 
             Book book = _mapper.Map<Book>(bookDTO);
 
-            unitOfWork.BookRepository.Insert(book);
+            unitOfWork.GetRepository<Book>().Insert(book);
 
             return CreatedAtAction("AddBook", new { id = book.Id }, book);
         }
@@ -50,7 +52,7 @@ namespace Library.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = unitOfWork.BookRepository.GetByID(id);
+            var book = unitOfWork.GetRepository<Book>().GetByID(id);
             if (book == null)
             {
                 return NotFound();
@@ -58,7 +60,7 @@ namespace Library.Controllers
 
             if (book.Persons.Count() == 0)
             {
-                unitOfWork.BookRepository.Delete(id);
+                unitOfWork.GetRepository<Book>().Delete(id);
                 unitOfWork.Save();
             }
             else
@@ -78,12 +80,12 @@ namespace Library.Controllers
         /// <param name="bookDTO"></param>
         /// <returns></returns>
 
-        [HttpPut("PutBook")]
-        public AuthorBooksGenresDTO PutBook([FromBody] BookDTO bookDTO)
+        [HttpPut("putBook")]
+        public AuthorBooksGenresDto PutBook( BookDto bookDTO,GenreDto genreDto)
         {
-            Genre genre = unitOfWork.GenreRepository.Get().ToList().LastOrDefault();
+            Genre genre = unitOfWork.GetRepository<Genre>().Get(e=>e.Id == genreDto.Id).FirstOrDefault();
             Book book = _mapper.Map<Book>(bookDTO);
-            if (book.Genres.Any(e => e.GenreName == genre.GenreName))
+            if (book.Genres.Any(e => e.Id == genre.Id))
             {
                 book.Genres.Remove(genre);
                 genre.Books.Remove(book);
@@ -93,14 +95,14 @@ namespace Library.Controllers
                 book.Genres.Add(genre);
                 genre.Books.Add(book);
             }
-            unitOfWork.GenreRepository.Update(genre);
-            unitOfWork.BookRepository.Update(book);
+            unitOfWork.GetRepository<Genre>().Update(genre);
+            unitOfWork.GetRepository<Book>().Update(book);
             unitOfWork.Save();
 
-            AuthorBooksGenresDTO obj = new();
-            obj.Author = _mapper.Map<AuthorDTO>(book.Author);
-            obj.Book = _mapper.Map<BookDTO>(book);
-            obj.Genre = (List<GenreDTO>)_mapper.Map<IEnumerable<GenreDTO>>(book.Genres);
+            AuthorBooksGenresDto obj = new();
+            obj.Author = _mapper.Map<AuthorDto>(book.Author);
+            obj.Book = _mapper.Map<BookDto>(book);
+            obj.Genre = _mapper.Map<List<GenreDto>>(book.Genres);
 
             return obj;
         }
@@ -112,17 +114,15 @@ namespace Library.Controllers
         /// <param name="authorDTO"></param>
         /// <returns></returns>
         // GET: api/Book
-        [HttpGet("GetBooksByAuthor")]
-        public IEnumerable<Book> GetBooksByAuthor([FromBody] AuthorDTO authorDTO)
+        [HttpGet("getBooksByAuthor")]
+        public IEnumerable<Book> GetBooksByAuthor([FromBody] AuthorDto authorDTO)
         {
             Author author = _mapper.Map<Author>(authorDTO);
-            var books = unitOfWork.BookRepository.Get(includeProperties: "Author,Genre")
-                                                    .ToList()
-                                                    .Where(e => e.Author.FirstName == author.FirstName
-                                                    && e.Author.LastName == author.LastName
-                                                    && e.Author.MiddleName == author.MiddleName)
-                                                    .ToList();
-
+            var books = unitOfWork.GetRepository<Book>().Get(e => e.Author.FirstName.ToLower() == author.FirstName.ToLower()
+                                                            && e.Author.LastName.ToLower() == author.LastName.ToLower()
+                                                            && e.Author.MiddleName.ToLower() == author.MiddleName.ToLower(), 
+                                                            null, 
+                                                            includeProperties: "Author,Genre");
 
             return books;
         }
@@ -133,23 +133,22 @@ namespace Library.Controllers
         /// </summary>
         /// <param name="genreDTO"></param>
         /// <returns></returns>
-        [HttpGet("GetBooksByGenre")]
-        public List<AuthorBooksGenresDTO> GetBooksByGenre([FromBody]  GenreDTO genreDTO)
+        [HttpGet("getBooksByGenre")]
+        public List<AuthorBooksGenresDto> GetBooksByGenre([FromBody]  GenreDto genreDTO)
         {
-            List<AuthorBooksGenresDTO> listBooks = new();
+            List<AuthorBooksGenresDto> listBooks = new();
             Genre genre = _mapper.Map<Genre>(genreDTO);
 
-            var books = unitOfWork.BookRepository.Get(includeProperties: "Author,Genre")
-                                                    .ToList()
-                                                    .Where(e => e.Genres.Any(e => e.Id == genre.Id))
-                                                    .ToList();
+            var books = unitOfWork.GetRepository<Book>().Get(e => e.Genres.Any(e => e.Id == genre.Id),
+                                                                                            null,
+                                                                                            includeProperties:"Author,Genre");
             foreach (var book in books)
             {
-                listBooks.Add(new AuthorBooksGenresDTO
+                listBooks.Add(new AuthorBooksGenresDto
                 {
-                    Author = _mapper.Map<AuthorDTO>(book.Author),
-                    Book = _mapper.Map<BookDTO>(book),
-                    Genre = (List<GenreDTO>)_mapper.Map<IEnumerable<GenreDTO>>(book.Genres.Where(e => e.Id == genre.Id))
+                    Author = _mapper.Map<AuthorDto>(book.Author),
+                    Book = _mapper.Map<BookDto>(book),
+                    Genre = _mapper.Map<List<GenreDto>>(book.Genres.Where(e => e.Id == genre.Id))
                 });
 
             }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Library.Models
 {
-    public class GenreDTO
+    public class GenreDto
     {
         [Required]
         public int Id { get; set; }
@@ -14,6 +14,6 @@ namespace Library.Models
         [Required]
         public string GenreName { get; set; }
 
-        public  List<BookDTO> Books { get; set; }
+        public  List<BookDto> Books { get; set; }
     }
 }

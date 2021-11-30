@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Library.Interfaces;
 using Library.Models;
 using Library.Models.DTO;
 using Library.Services;
@@ -15,10 +16,11 @@ namespace Library.Controllers
     [ApiController]
     public class AuthorController : ControllerBase
     {
-        private UnitOfWork unitOfWork = new UnitOfWork();
+        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper _mapper;
-        public AuthorController(IMapper mapper)
-        {            
+        public AuthorController(IMapper mapper, IUnitOfWork unitOfWork)
+        {
+            this.unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -26,10 +28,10 @@ namespace Library.Controllers
         /// 2.7.3.1.	Можно получить список всех авторов. (без книг, как и везде, где не указано обратное)
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetAuthors")]
+        [HttpGet("getAuthors")]
         public ActionResult<IEnumerable<Author>> GetAuthors()
         {
-            return unitOfWork.AuthorRepository.Get().ToList();
+            return unitOfWork.GetRepository<Author>().Get().ToList();
         }
 
         /// <summary>
@@ -37,22 +39,21 @@ namespace Library.Controllers
         /// </summary>
         /// <param name="authorDTO"></param>
         /// <returns></returns>
-        [HttpGet("GetAuthorWithBooks")]
-        public List<AuthorBooksGenresDTO> GetAuthorWithBooks([FromBody] AuthorDTO authorDTO)
+        [HttpGet("getAuthorWithBooks")]
+        public List<AuthorBooksGenresDto> GetAuthorWithBooks([FromBody] AuthorDto authorDTO)
         {
-            List<AuthorBooksGenresDTO> listBooks = new();
+            List<AuthorBooksGenresDto> listBooks = new();
             Author author = _mapper.Map<Author>(authorDTO);
-            var books = unitOfWork.BookRepository.Get(includeProperties: "Author,Genre")
-                                                    .ToList()
-                                                    .Where(e=>e.AuthorId == author.Id)
-                                                    .ToList();
+            var books = unitOfWork.GetRepository<Book>().Get(e => e.AuthorId == author.Id,
+                                                                                null, 
+                                                                                includeProperties: "Author,Genre");
             foreach (var book in books)
             {
-                listBooks.Add(new AuthorBooksGenresDTO
+                listBooks.Add(new AuthorBooksGenresDto
                 {
-                    Author = _mapper.Map<AuthorDTO>(book.Author),
-                    Book = _mapper.Map<BookDTO>(book),
-                    Genre = (List<GenreDTO>)_mapper.Map<IEnumerable<GenreDTO>>(book.Genres)
+                    Author = _mapper.Map<AuthorDto>(book.Author),
+                    Book = _mapper.Map<BookDto>(book),
+                    Genre = _mapper.Map<List<GenreDto>>(book.Genres)
                 });
 
             }
@@ -67,13 +68,13 @@ namespace Library.Controllers
         /// <returns></returns>
 
         [HttpPost]
-        public AuthorBooksDTO AddAuthor([FromBody] AuthorDTO authorDTO) 
+        public AuthorBooksDto AddAuthor([FromBody] AuthorDto authorDTO) 
         {
-            AuthorBooksDTO obj = new();
+            AuthorBooksDto obj = new();
             Author author = _mapper.Map<Author>(authorDTO);
-            List<BookDTO> books = (List<BookDTO>)_mapper.Map<IEnumerable<BookDTO>>(author.Books);
+            List<BookDto> books = _mapper.Map<List<BookDto>>(author.Books);
 
-            unitOfWork.AuthorRepository.Insert(author);                        
+            unitOfWork.GetRepository<Author>().Insert(author);                        
             unitOfWork.Save();
 
             obj.Author = authorDTO;
@@ -88,22 +89,22 @@ namespace Library.Controllers
         /// </summary>
         /// <param name="authorDTO"></param>
         /// <returns></returns>
-        [HttpDelete("DeleteAuthor")]
-        public IActionResult DeleteAuthor([FromBody] AuthorDTO authorDTO)
+        [HttpDelete("deleteAuthor")]
+        public IActionResult DeleteAuthor([FromBody] AuthorDto authorDTO)
         {
             Author author = _mapper.Map<Author>(authorDTO);
 
-            var books = unitOfWork.BookRepository.Get(includeProperties: "Author")
-                                                    .ToList()
-                                                    .Where(e => e.AuthorId == author.Id)
-                                                    .ToList();
+            var books = unitOfWork.GetRepository<Book>().Get(e => e.AuthorId == author.Id,
+                                                                                null,
+                                                                                includeProperties: "Author");
+
             if (books.Count() > 0)
             {
-                return Content($"У автора {author.LastName} есть книги. Нельзя удалить автора, пока есть его книги");
+                return BadRequest($"У автора {author.LastName} есть книги. Нельзя удалить автора, пока есть его книги");
             }
             else 
             {
-                unitOfWork.AuthorRepository.Delete(author.Id);
+                unitOfWork.GetRepository<Author>().Delete(author.Id);
                 unitOfWork.Save();
             }
 

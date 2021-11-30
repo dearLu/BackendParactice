@@ -12,7 +12,7 @@ namespace Library.Services
 	{
 		public LibraryProfile()
 		{
-			CreateMap<Person, HumanDTO>()
+			CreateMap<Person, HumanDto>()
 				.ForMember(dest =>
 					dest.Id,
 					opt => opt.MapFrom(src => src.Id))
@@ -30,7 +30,7 @@ namespace Library.Services
 					opt => opt.MapFrom(src => src.BirthDate))
 				.ReverseMap();
 
-			CreateMap<Genre, GenreDTO>()
+			CreateMap<Genre, GenreDto>()
 				.ForMember(dest =>
 					dest.Id,
 					opt => opt.MapFrom(src => src.Id))
@@ -39,7 +39,7 @@ namespace Library.Services
 					opt => opt.MapFrom(src => src.GenreName))
 				.ReverseMap();
 
-			CreateMap<Author, AuthorDTO>()
+			CreateMap<Author, AuthorDto>()
 				.ForMember(dest =>
 					dest.Id,
 					opt => opt.MapFrom(src => src.Id))
@@ -54,7 +54,7 @@ namespace Library.Services
 					opt => opt.MapFrom(src => src.MiddleName))
 				.ReverseMap();
 
-			CreateMap<Book, BookDTO>()
+			CreateMap<Book, BookDto>()
 				.ForMember(dest =>
 					dest.Id,
 					opt => opt.MapFrom(src => src.Id))
@@ -65,7 +65,6 @@ namespace Library.Services
 					dest.Author,
 					opt => opt.MapFrom(src => src.Author))
 				.ReverseMap();
-
 
 		}
 	}

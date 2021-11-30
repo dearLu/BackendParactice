@@ -1,4 +1,5 @@
-﻿using Library.Models;
+﻿using Library.Interfaces;
+using Library.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,13 +17,14 @@ namespace Library.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("api/[controller]")]
-    public class BookDTOController : ControllerBase
+    public class BookDtoController : ControllerBase
     {
+        private readonly IUnitOfWork unitOfWork;
+        private readonly ILogger<BookDtoController> _logger;
 
-        private readonly ILogger<BookDTOController> _logger;
-
-        public BookDTOController(ILogger<BookDTOController> logger)
+        public BookDtoController(ILogger<BookDtoController> logger, IUnitOfWork unitOfWork)
         {
+            this.unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -30,8 +32,8 @@ namespace Library.Controllers
         /// 1.4.1.1 - метод Get, возвращающий список всех книг
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetAllBook")]
-        public IEnumerable<BookDTO> GetAllBook()
+        [HttpGet("getAllBook")]
+        public IEnumerable<BookDto> GetAllBook()
         {
             return DataDTO.AllBook;
         }
@@ -40,10 +42,10 @@ namespace Library.Controllers
         /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
         /// </summary>
         /// <returns></returns>
-        [HttpGet("GetFilterBooks")]
-        public IEnumerable<BookDTO> GetFilterBooks([FromRoute] bool title = false,bool genre = false)
+        [HttpGet("getFilterBooks")]
+        public IEnumerable<BookDto> GetFilterBooks(bool title = false,bool genre = false,bool descending= false )
         {
-           
+            //descending учесть
             if (title)
                 return DataDTO.AllBook.OrderBy(e => e.Title).ToList();
             else if(genre)
@@ -58,14 +60,14 @@ namespace Library.Controllers
         /// </summary>
         /// <param name="AuthorId"></param>
         /// <returns></returns>
-        [HttpGet("GetBookByAuthor")]
-        public IEnumerable<BookDTO> GetBookByAuthor([FromRoute] int AuthorId) 
+        [HttpGet("getBookByAuthor")]
+        public IEnumerable<BookDto> GetBookByAuthor([FromRoute] int AuthorId) 
         {
             return DataDTO.AllBook.Where(e => e.Author.Id == AuthorId).ToList();
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BookDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BookDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetById([FromRoute] int id)
         {
@@ -87,7 +89,7 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<BookDTO> AddBookDTO([FromBody] BookDTO book)
+        public ActionResult<BookDto> AddBookDTO([FromBody] BookDto book)
         {
             DataDTO.AllBook.Add(book);
             return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);

@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace Library.Models.DTO
 {
-    public class AuthorBooksDTO
+    public class AuthorBooksDto
     {
-        public AuthorDTO Author { get; set; }
-        public List<BookDTO> Books { get; set; }
+        public AuthorDto Author { get; set; }
+        public List<BookDto> Books { get; set; }
 
     }
 }

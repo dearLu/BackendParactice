@@ -20,10 +20,10 @@ namespace Library.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Не указан читатель")]
-        public HumanDTO Reader { get; set; }
+        public HumanDto Reader { get; set; }
 
         [Required(ErrorMessage = "Не указана книга")]
-        public BookDTO Book { get; set; }
+        public BookDto Book { get; set; }
 
         /// <summary>
         /// 2.1.5 - Использовать формат даты и времени yyyy-MM-ddTHH:mm:ss.fffzzz (2021-01-01T16:01:12.257+04:00)

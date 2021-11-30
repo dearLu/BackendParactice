@@ -18,9 +18,8 @@ namespace Library.Controllers
     [ApiController]
     public class LibraryCardController : ControllerBase
     {
-        private readonly ILogger<BookDTOController> _logger;
-
-        public LibraryCardController(ILogger<BookDTOController> logger)
+        private readonly ILogger<BookDtoController> _logger;
+        public LibraryCardController(ILogger<BookDtoController> logger)
         {
             _logger = logger;
 

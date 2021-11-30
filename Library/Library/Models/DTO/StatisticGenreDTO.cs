@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Library.Models.DTO
 {
-    public class StatisticGenreDTO
+    public class StatisticGenreDto
     {
         public string GenreName { get; set; }
 

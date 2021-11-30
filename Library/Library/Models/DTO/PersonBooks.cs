@@ -7,7 +7,7 @@ namespace Library.Models.DTO
 {
     public class PersonBooks
     {
-        public HumanDTO Human { get; set; }
-        public List<BookDTO> Books { get; set; }
+        public HumanDto Human { get; set; }
+        public List<BookDto> Books { get; set; }
     }
 }
