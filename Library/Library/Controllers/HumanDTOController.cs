@@ -1,4 +1,5 @@
-﻿using Library.Interfaces;
+﻿using AutoMapper;
+using Library.Interfaces;
 using Library.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +22,12 @@ namespace Library.Controllers
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly ILogger<HumanDtoController> _logger;
-
-        public HumanDtoController(ILogger<HumanDtoController> logger, IUnitOfWork unitOfWork)
+        private readonly IMapper mapper;
+        public HumanDtoController(ILogger<HumanDtoController> logger, IUnitOfWork unitOfWork, IMapper mapper)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
+            this.mapper = mapper;
         }
 
         /// <summary>
@@ -35,7 +37,7 @@ namespace Library.Controllers
         [HttpGet("getAll")]
         public IEnumerable<HumanDto> GetAll()
         {
-            return DataDTO.AllHuman;
+            return mapper.Map<List<HumanDto>>(unitOfWork.GetRepository<Person>().Get());
         }
 
 
@@ -47,10 +49,10 @@ namespace Library.Controllers
         [HttpGet("getHuman")]
         public IEnumerable<HumanDto> GetHuman([FromRoute] string filter)
         {
-
-            return DataDTO.AllHuman.Where(e => e.Name.ToLower() == filter.ToLower()
-                                            || e.Surname.ToLower() == filter.ToLower()
-                                            || e.Patronymic.ToLower() == filter.ToLower()).ToList();
+            return mapper.Map<List<HumanDto>>(unitOfWork.GetRepository<Person>()
+                                                     .Get(e => e.FirstName.ToLower() == filter.ToLower()
+                                                    || e.LastName.ToLower() == filter.ToLower()
+                                                    || e.MiddleName.ToLower() == filter.ToLower()));
         }
 
         [HttpGet("{id}")]
@@ -58,7 +60,7 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetById(int id)
         {
-            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == id);
+            var human = mapper.Map<HumanDto>(unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault());
             if (human == null)
             {
                 return NotFound();
@@ -76,10 +78,11 @@ namespace Library.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<HumanDto> AddHumanDTO ([FromBody] HumanDto human)
+        public ActionResult<HumanDto> AddHumanDTO([FromBody] HumanDto human)
         {
-            DataDTO.AllHuman.Add(human);
-            return CreatedAtAction(nameof(GetById), new { id = human.Id }, human);
+            var person = mapper.Map<Person>(human);
+            unitOfWork.GetRepository<Person>().Insert(person);
+            return CreatedAtAction("AddHumanDTO", new { id = person.Id }, human);
         }
 
         /// <summary>
@@ -90,14 +93,13 @@ namespace Library.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteHuman([FromRoute] int id)
         {
-            var human = DataDTO.AllHuman.Where(e => e.Id == id).FirstOrDefault();
+            var person = unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault();
 
-            if (human == null)
+            if (person == null)
             {
                 return NotFound();
             }
-
-            DataDTO.AllHuman.Remove(human);
+            unitOfWork.GetRepository<Person>().Delete(person);
 
             return NoContent();
         }

@@ -35,7 +35,7 @@ namespace Library
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<LibraryContext>(options => options.UseSqlServer(connection));            
+            services.AddDbContext<LibraryContext>(options => options.UseSqlServer(connection));
             services.AddAutoMapper(typeof(Startup));
             services.AddMvc();
             services.AddControllers();

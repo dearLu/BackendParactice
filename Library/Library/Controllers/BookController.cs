@@ -81,10 +81,11 @@ namespace Library.Controllers
         /// <returns></returns>
 
         [HttpPut("putBook")]
-        public AuthorBooksGenresDto PutBook( BookDto bookDTO,GenreDto genreDto)
+        public AuthorBooksGenresDto PutBook(BookDto bookDTO)
         {
-            Genre genre = unitOfWork.GetRepository<Genre>().Get(e=>e.Id == genreDto.Id).FirstOrDefault();
             Book book = _mapper.Map<Book>(bookDTO);
+            Genre genre = unitOfWork.GetRepository<Genre>().Get(e => !book.Genres.Contains(e)).FirstOrDefault();
+           
             if (book.Genres.Any(e => e.Id == genre.Id))
             {
                 book.Genres.Remove(genre);
@@ -140,8 +141,8 @@ namespace Library.Controllers
             Genre genre = _mapper.Map<Genre>(genreDTO);
 
             var books = unitOfWork.GetRepository<Book>().Get(e => e.Genres.Any(e => e.Id == genre.Id),
-                                                                                            null,
-                                                                                            includeProperties:"Author,Genre");
+                                                            null,
+                                                            includeProperties:"Author,Genre");
             foreach (var book in books)
             {
                 listBooks.Add(new AuthorBooksGenresDto

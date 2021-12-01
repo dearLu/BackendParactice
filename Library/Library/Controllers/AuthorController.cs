@@ -43,6 +43,7 @@ namespace Library.Controllers
         public List<AuthorBooksGenresDto> GetAuthorWithBooks([FromBody] AuthorDto authorDTO)
         {
             List<AuthorBooksGenresDto> listBooks = new();
+
             Author author = _mapper.Map<Author>(authorDTO);
             var books = unitOfWork.GetRepository<Book>().Get(e => e.AuthorId == author.Id,
                                                                                 null, 

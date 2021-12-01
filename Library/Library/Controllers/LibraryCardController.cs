@@ -25,41 +25,41 @@ namespace Library.Controllers
 
         }
 
-        [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LibraryCard))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetById([FromRoute] int id)
-        {
-            var card = DataDTO.Cards.Where(e => e.Id == id).FirstOrDefault();
-            if (card == null)
-            {
-                return NotFound();
-            }
+        //[HttpGet("{id}")]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LibraryCard))]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public IActionResult GetById([FromRoute] int id)
+        //{
+        //    var card = DataDTO.Cards.Where(e => e.Id == id).FirstOrDefault();
+        //    if (card == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(card);
-        }
+        //    return Ok(card);
+        //}
 
-        /// <summary>
-        /// 2.1.4 - метод POST отвечающий за взятие книги читателем. На вход - вышеописанный объект
-        /// </summary>
-        /// <param name="card"></param>
-        /// <returns></returns>
+        ///// <summary>
+        ///// 2.1.4 - метод POST отвечающий за взятие книги читателем. На вход - вышеописанный объект
+        ///// </summary>
+        ///// <param name="card"></param>
+        ///// <returns></returns>
 
-        [HttpPost]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public  ActionResult<LibraryCard> AddLibraryCard([FromBody] LibraryCard card)
-        {
-            if (card == null)
-            {
-                return BadRequest();
-            }
+        //[HttpPost]
+        //[Consumes(MediaTypeNames.Application.Json)]
+        //[ProducesResponseType(StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public  ActionResult<LibraryCard> AddLibraryCard([FromBody] LibraryCard card)
+        //{
+        //    if (card == null)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            DataDTO.Cards.Add(card);
+        //    DataDTO.Cards.Add(card);
 
-            return  CreatedAtAction(nameof(GetById), new { id = card.Id }, card);
-        }
+        //    return  CreatedAtAction(nameof(GetById), new { id = card.Id }, card);
+        //}
 
     }
 }

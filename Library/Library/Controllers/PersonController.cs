@@ -18,11 +18,11 @@ namespace Library.Controllers
     public class PersonController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
-        private readonly IMapper _mapper;
+        private readonly IMapper mapper;
         public PersonController(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
-            _mapper = mapper;
+            this.mapper = mapper;
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Library.Controllers
         [HttpPost]
         public ActionResult<Person> AddPerson([FromBody] HumanDto human)
         {
-            Person person = _mapper.Map<Person>(human);
+            Person person = mapper.Map<Person>(human);
             unitOfWork.GetRepository<Person>().Insert(person);
             unitOfWork.Save();
             return CreatedAtAction("AddPerson", new { id = person.Id }, person);
@@ -49,7 +49,7 @@ namespace Library.Controllers
         [HttpPut]
         public ActionResult<Person> UpdatePerson([FromBody] HumanDto human)
         {
-            Person person = _mapper.Map<Person>(human);
+            Person person = mapper.Map<Person>(human);
             try
             {
                 unitOfWork.GetRepository<Person>().Update(person);
@@ -78,21 +78,14 @@ namespace Library.Controllers
         public IActionResult DeletePerson([FromRoute] int id)
         {
 
-            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == id);
-
-            if (human == null)
-            {
-                return NotFound();
-            }
-
-            Person person = _mapper.Map<Person>(human);
+            var person = unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault();
 
             if (person == null)
             {
                 return NotFound();
             }
 
-            unitOfWork.GetRepository<Person>().Delete(person.Id);
+            unitOfWork.GetRepository<Person>().Delete(person);
             unitOfWork.Save();
 
             return Ok();
@@ -112,17 +105,17 @@ namespace Library.Controllers
                 return NotFound();
             }
 
-            Person person = _mapper.Map<Person>(human);
+            Person person = mapper.Map<Person>(human);
 
             var listPersons = unitOfWork.GetRepository<Person>().Get(e => e.FirstName == person.FirstName
-                                            && e.LastName == person.LastName
-                                            && e.MiddleName == person.MiddleName);
+                                                                    && e.LastName == person.LastName
+                                                                    && e.MiddleName == person.MiddleName);
 
             if (listPersons.Count() > 0)
             {
                 foreach (var p in listPersons)
                 {
-                    unitOfWork.GetRepository<Person>().Delete(p.Id);
+                    unitOfWork.GetRepository<Person>().Delete(p);
                 }
 
                 unitOfWork.Save();
@@ -143,12 +136,11 @@ namespace Library.Controllers
         /// <param name="Id"></param>
         /// <returns></returns>
         [HttpGet("getListBook")]
-        public List<AuthorBooksGenresDto> GetListBook([FromRoute] int Id) 
+        public List<AuthorBooksGenresDto> GetListBook([FromRoute] int id) 
         {
             List<AuthorBooksGenresDto> listBooks = new();
-            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == Id);         
+            var person = unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault();
 
-            Person person = _mapper.Map<Person>(human);
 
             var books = unitOfWork.GetRepository<Book>().Get(e => e.Persons.Any(q => q.Id == person.Id),
                                                             null,
@@ -157,15 +149,14 @@ namespace Library.Controllers
             {
                 listBooks.Add(new AuthorBooksGenresDto
                 {
-                    Author = _mapper.Map<AuthorDto>(book.Author),
-                    Book = _mapper.Map<BookDto>(book),
-                    Genre = _mapper.Map<List<GenreDto>>(book.Genres)
+                    Author = mapper.Map<AuthorDto>(book.Author),
+                    Book = mapper.Map<BookDto>(book),
+                    Genre = mapper.Map<List<GenreDto>>(book.Genres)
                 });
 
             }
 
             return listBooks;
-
         }
 
         /// <summary>
@@ -179,18 +170,16 @@ namespace Library.Controllers
         public PersonBooks PutBookForPerson(int id, BookDto bookDTO)
         {
 
-            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == id);
-
-            Person person = _mapper.Map<Person>(human);
-            Book book = _mapper.Map<Book>(bookDTO);
+            var person = unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault();
+            Book book = mapper.Map<Book>(bookDTO);
 
             person.Books.Add(book);
             unitOfWork.GetRepository<Person>().Update(person);
             unitOfWork.Save();
 
             PersonBooks obj = new();
-            obj.Human = _mapper.Map<HumanDto>(person);
-            obj.Books = _mapper.Map<List<BookDto>>(person.Books);
+            obj.Human = mapper.Map<HumanDto>(person);
+            obj.Books = mapper.Map<List<BookDto>>(person.Books);
             return obj;
         }
 
@@ -203,22 +192,17 @@ namespace Library.Controllers
         [HttpDelete("returnBook")]
         public PersonBooks ReturnBook( int id, BookDto bookDTO)
         {
-            var human = DataDTO.AllHuman.FirstOrDefault(e => e.Id == id);
-
-            Person person = _mapper.Map<Person>(human);
-            Book book = _mapper.Map<Book>(bookDTO);
+            var person = unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault();
+            Book book = mapper.Map<Book>(bookDTO);
 
             person.Books.Remove(book);
             unitOfWork.GetRepository<Person>().Update(person);
             unitOfWork.Save();
 
             PersonBooks obj = new();
-            obj.Human = _mapper.Map<HumanDto>(person);
-            obj.Books = _mapper.Map<List<BookDto>>(person.Books);
+            obj.Human = mapper.Map<HumanDto>(person);
+            obj.Books = mapper.Map<List<BookDto>>(person.Books);
             return obj;
-        }
-
-
-        
+        }     
     }
 }
