@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Library.Models
+{
+    /// <summary>
+    /// 2.2	Подготовить в приложении сущности согласно созданной ранее базе данных 
+    /// </summary>
+    public class Book
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        [ForeignKey("Author")]
+        public int AuthorId { get; set; }
+
+        public virtual Author Author { get; set; }
+
+        [NotMapped]
+        public virtual ICollection<Genre> Genres { get; set; }
+        [NotMapped]
+        public virtual ICollection<Person> Persons { get; set; }
+    }
+}

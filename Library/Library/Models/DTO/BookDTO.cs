@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Library.Models.DTO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Library.Models
     /// <summary>
     /// 1.2.2 - Класс книги
     /// </summary>
-    public class BookDTO
+    public class BookDto
     {
         /// <summary>
         /// 2.2.1 - Добавьте валидации в ваши сущности: все обязательные поля должны быть NotNull. 
@@ -21,10 +22,13 @@ namespace Library.Models
         public string Title { get; set; }
 
         [Required(ErrorMessage = "Не указан автор")]
-        public HumanDTO Author { get; set; }
+        public AuthorDto Author { get; set; }
 
         [Required(ErrorMessage = "Не указан жанр")]
-        public string Genre { get; set; }
-    
+      
+        public  List<GenreDto> Genres { get; set; }
+       
+        public  List<HumanDto> Persons { get; set; }
+
     }
 }

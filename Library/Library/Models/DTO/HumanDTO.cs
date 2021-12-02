@@ -9,7 +9,7 @@ namespace Library.Models
     /// <summary>
     /// 1.2.1 - Класс человека
     /// </summary>
-    public class HumanDTO
+    public class HumanDto
     {
         /// <summary>
         /// 2.2.1 - Добавьте валидации в ваши сущности: все обязательные поля должны быть NotNull. 

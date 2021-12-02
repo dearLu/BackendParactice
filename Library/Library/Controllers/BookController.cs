@@ -1,116 +1,161 @@
-﻿using Library.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Library.Models;
+using Library.Services;
+using AutoMapper;
+using Library.Models.DTO;
+using Library.Interfaces;
 
 namespace Library.Controllers
 {
-    /// <summary>
-    /// 1.4 - Контроллер, который отвечает за книгу
-    /// </summary>
-    [Produces("application/json")]
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class BookController : ControllerBase
     {
-
-        private readonly ILogger<BookController> _logger;
-
-        public BookController(ILogger<BookController> logger)
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IMapper _mapper;
+        public BookController(IMapper mapper, IUnitOfWork unitOfWork)
         {
-            _logger = logger;
+            this.unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         /// <summary>
-        /// 1.4.1.1 - метод Get, возвращающий список всех книг
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetAllBook")]
-        public IEnumerable<BookDTO> GetAllBook()
-        {
-            return DataDTO.AllBook;
-        }
-
-        /// <summary>
-        /// 2.2.2 - Добавьте в список книг возможность сделать запрос с сортировкой по автору, имени книги и жанру
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("GetFilterBooks")]
-        public IEnumerable<BookDTO> GetFilterBooks([FromRoute] bool title = false,bool genre = false)
-        {
-           
-            if (title)
-                return DataDTO.AllBook.OrderBy(e => e.Title).ToList();
-            else if(genre)
-                return DataDTO.AllBook.OrderBy(e => e.Genre).ToList();
-            else
-                return DataDTO.AllBook.OrderBy(e => e.Author).ToList();
-
-        }
-
-        /// <summary>
-        /// 1.4.1.2 - метод Get, возвращающий список всех книг по автору (фильтрация AuthorId)
-        /// </summary>
-        /// <param name="AuthorId"></param>
-        /// <returns></returns>
-        [HttpGet("GetBookByAuthor")]
-        public IEnumerable<BookDTO> GetBookByAuthor([FromRoute] int AuthorId) 
-        {
-            return DataDTO.AllBook.Where(e => e.Author.Id == AuthorId).ToList();
-        }
-
-        [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BookDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetById([FromRoute] int id)
-        {
-            var book = DataDTO.AllBook.FirstOrDefault(e => e.Id == id);
-            if (book == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(book);
-        }
-
-        /// <summary>
-        /// 1.4.2 - метод POST, добавляющий новую книгу
+        /// 2.7.2.1.	Книга может быть добавлена (POST) (вместе с автором и жанром) книга + автор + жанр
         /// </summary>
         /// <param name="book"></param>
         /// <returns></returns>
+        // POST: api/Book
         [HttpPost]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<BookDTO> AddBookDTO([FromBody] BookDTO book)
+        public ActionResult<Book> AddBook([FromBody] BookDto bookDTO)
         {
-            DataDTO.AllBook.Add(book);
-            return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
+
+            Book book = _mapper.Map<Book>(bookDTO);
+
+            unitOfWork.GetRepository<Book>().Insert(book);
+
+            return CreatedAtAction("AddBook", new { id = book.Id }, book);
         }
 
         /// <summary>
-        /// 1.4.3 - метод DELETE, удаляющий книгу
+        /// 2.7.2.2.	Книга может быть удалена из списка библиотеки (но только если она не у пользователя) по ID (ок, или
+        /// ошибка, что книга у пользователя)
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        // DELETE: api/Book/5
         [HttpDelete("{id}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = DataDTO.AllBook.Where(e => e.Id == id).FirstOrDefault();
-
+            var book = unitOfWork.GetRepository<Book>().GetByID(id);
             if (book == null)
             {
                 return NotFound();
             }
 
-            DataDTO.AllBook.Remove(book);
+            if (book.Persons.Count() == 0)
+            {
+                unitOfWork.GetRepository<Book>().Delete(id);
+                unitOfWork.Save();
+            }
+            else
+            {
+                return  Content($"Книга {book.Name} уже у пользователя. Невозможно удалить");              
+            }
 
-            return NoContent();
+             return Ok();
         }
+
+        /// <summary>
+        /// 2.7.2.3.	Книге можно присвоить новый жанр, или удалить один из имеющихся (PUT с телом.На вход сущность Book 
+        /// или её Dto) При добавлении или удалении вы должны просто либо добавлять запись, либо удалять из списка 
+        /// жанров. 
+        /// Каскадно удалять все жанры и книги с таким жанром нельзя! Книга + жанр + автор
+        /// </summary>
+        /// <param name="bookDTO"></param>
+        /// <returns></returns>
+
+        [HttpPut("putBook")]
+        public AuthorBooksGenresDto PutBook(BookDto bookDTO)
+        {
+            Book book = _mapper.Map<Book>(bookDTO);
+            Genre genre = unitOfWork.GetRepository<Genre>().Get(e => !book.Genres.Contains(e)).FirstOrDefault();
+           
+            if (book.Genres.Any(e => e.Id == genre.Id))
+            {
+                book.Genres.Remove(genre);
+                genre.Books.Remove(book);
+            }
+            else 
+            {
+                book.Genres.Add(genre);
+                genre.Books.Add(book);
+            }
+            unitOfWork.GetRepository<Genre>().Update(genre);
+            unitOfWork.GetRepository<Book>().Update(book);
+            unitOfWork.Save();
+
+            AuthorBooksGenresDto obj = new();
+            obj.Author = _mapper.Map<AuthorDto>(book.Author);
+            obj.Book = _mapper.Map<BookDto>(book);
+            obj.Genre = _mapper.Map<List<GenreDto>>(book.Genres);
+
+            return obj;
+        }
+
+        /// <summary>
+        /// 2.7.2.4. Можно получить список всех книг с фильтром по автору (По любой комбинации трёх полей сущности автор.
+        /// Имеется  ввиду условие equals + and )
+        /// </summary>
+        /// <param name="authorDTO"></param>
+        /// <returns></returns>
+        // GET: api/Book
+        [HttpGet("getBooksByAuthor")]
+        public IEnumerable<Book> GetBooksByAuthor([FromBody] AuthorDto authorDTO)
+        {
+            Author author = _mapper.Map<Author>(authorDTO);
+            var books = unitOfWork.GetRepository<Book>().Get(e => e.Author.FirstName.ToLower() == author.FirstName.ToLower()
+                                                            && e.Author.LastName.ToLower() == author.LastName.ToLower()
+                                                            && e.Author.MiddleName.ToLower() == author.MiddleName.ToLower(), 
+                                                            null, 
+                                                            includeProperties: "Author,Genre");
+
+            return books;
+        }
+
+
+        /// <summary>
+        /// 2.7.2.5.	Можно получить список книг по жанру. Книга + жанр + автор
+        /// </summary>
+        /// <param name="genreDTO"></param>
+        /// <returns></returns>
+        [HttpGet("getBooksByGenre")]
+        public List<AuthorBooksGenresDto> GetBooksByGenre([FromBody]  GenreDto genreDTO)
+        {
+            List<AuthorBooksGenresDto> listBooks = new();
+            Genre genre = _mapper.Map<Genre>(genreDTO);
+
+            var books = unitOfWork.GetRepository<Book>().Get(e => e.Genres.Any(e => e.Id == genre.Id),
+                                                            null,
+                                                            includeProperties:"Author,Genre");
+            foreach (var book in books)
+            {
+                listBooks.Add(new AuthorBooksGenresDto
+                {
+                    Author = _mapper.Map<AuthorDto>(book.Author),
+                    Book = _mapper.Map<BookDto>(book),
+                    Genre = _mapper.Map<List<GenreDto>>(book.Genres.Where(e => e.Id == genre.Id))
+                });
+
+            }
+
+            return listBooks;
+        }
+
     }
 }

@@ -1,0 +1,45 @@
+Use Library
+
+CREATE TABLE Genre
+(
+    Id INT PRIMARY KEY IDENTITY NOT NULL,    
+    Genre_Name NVARCHAR(20) NOT NULL,
+)
+CREATE TABLE Author
+(
+    Id INT PRIMARY KEY IDENTITY NOT NULL, 
+	First_Name NVARCHAR(30)  NOT NULL,
+    Last_Name NVARCHAR(30)   NOT NULL,
+	Middle_Name NVARCHAR(30)  
+)
+CREATE TABLE Person
+(
+    Id INT PRIMARY KEY IDENTITY NOT NULL,
+	Birth_Date DATETIME,
+	First_Name NVARCHAR(30)   NOT NULL,
+    Last_Name NVARCHAR(30)   NOT NULL,
+	Middle_Name NVARCHAR(30)  
+)
+CREATE TABLE Book
+(
+    Id INT PRIMARY KEY IDENTITY NOT NULL,
+	Name NVARCHAR(30)   NOT NULL,
+	Author_Id INT NOT NULL,
+    FOREIGN KEY (Author_Id) REFERENCES Author(Id)
+)
+CREATE TABLE Book_Genre
+(
+    Book_Id INT NOT NULL,
+	Genre_id INT  NOT NULL,
+	PRIMARY KEY(Book_Id, Genre_id),
+	FOREIGN KEY (Book_Id) REFERENCES Book(Id),
+    FOREIGN KEY (Genre_Id) REFERENCES Genre(Id)
+)
+CREATE TABLE Library_Card
+(
+    Book_Id INT NOT NULL,
+	Person_Id INT  NOT NULL,
+	PRIMARY KEY(Book_Id, Person_Id),
+	FOREIGN KEY (Book_Id) REFERENCES Book(Id),
+    FOREIGN KEY (Person_Id) REFERENCES Person(Id)
+)
