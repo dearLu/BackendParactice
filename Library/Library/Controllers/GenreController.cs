@@ -16,11 +16,11 @@ namespace Library.Controllers
     [ApiController]
     public class GenreController : ControllerBase
     {
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         public GenreController(IMapper mapper, IUnitOfWork unitOfWork)
         {
-            this.unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -31,7 +31,7 @@ namespace Library.Controllers
         [HttpGet("getAllGenres")]
         public List<GenreDto> GetAllGenres()
         {
-            return _mapper.Map<List<GenreDto>>(unitOfWork.GetRepository<Genre>().Get());
+            return _mapper.Map<List<GenreDto>>(_unitOfWork.GetRepository<Genre>().Get());
         }
 
         /// <summary>
@@ -43,8 +43,8 @@ namespace Library.Controllers
         public ActionResult<Genre> AddGenre([FromBody] GenreDto genreDTO)
         {
             Genre genre = _mapper.Map<Genre>(genreDTO);
-            unitOfWork.GetRepository<Genre>().Insert(genre);
-            unitOfWork.Save();
+            _unitOfWork.GetRepository<Genre>().Insert(genre);
+            _unitOfWork.Save();
             return CreatedAtAction("AddGenre", new { id = genre.Id }, genre);
         }
 
@@ -56,7 +56,7 @@ namespace Library.Controllers
         public List<StatisticGenreDto> GetStatictic()
         {
             List<StatisticGenreDto> statistic = new();
-            var genres = _mapper.Map<List<GenreDto>>(unitOfWork.GetRepository<Genre>()
+            var genres = _mapper.Map<List<GenreDto>>(_unitOfWork.GetRepository<Genre>()
                                                 .Get(includeProperties: "Book"));
 
             foreach (var genre in genres)

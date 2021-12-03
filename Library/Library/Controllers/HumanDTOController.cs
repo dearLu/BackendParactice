@@ -20,14 +20,14 @@ namespace Library.Controllers
     [Route("api/[controller]")]
     public class HumanDtoController : ControllerBase
     {
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<HumanDtoController> _logger;
-        private readonly IMapper mapper;
+        private readonly IMapper _mapper;
         public HumanDtoController(ILogger<HumanDtoController> logger, IUnitOfWork unitOfWork, IMapper mapper)
         {
-            this.unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
             _logger = logger;
-            this.mapper = mapper;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Library.Controllers
         [HttpGet("getAll")]
         public IEnumerable<HumanDto> GetAll()
         {
-            return mapper.Map<List<HumanDto>>(unitOfWork.GetRepository<Person>().Get());
+            return _mapper.Map<List<HumanDto>>(_unitOfWork.GetRepository<Person>().Get());
         }
 
 
@@ -49,7 +49,7 @@ namespace Library.Controllers
         [HttpGet("getHuman")]
         public IEnumerable<HumanDto> GetHuman([FromRoute] string filter)
         {
-            return mapper.Map<List<HumanDto>>(unitOfWork.GetRepository<Person>()
+            return _mapper.Map<List<HumanDto>>(_unitOfWork.GetRepository<Person>()
                                                      .Get(e => e.FirstName.ToLower() == filter.ToLower()
                                                     || e.LastName.ToLower() == filter.ToLower()
                                                     || e.MiddleName.ToLower() == filter.ToLower()));
@@ -60,7 +60,7 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetById(int id)
         {
-            var human = mapper.Map<HumanDto>(unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault());
+            var human = _mapper.Map<HumanDto>(_unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault());
             if (human == null)
             {
                 return NotFound();
@@ -80,8 +80,8 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<HumanDto> AddHumanDTO([FromBody] HumanDto human)
         {
-            var person = mapper.Map<Person>(human);
-            unitOfWork.GetRepository<Person>().Insert(person);
+            var person = _mapper.Map<Person>(human);
+            _unitOfWork.GetRepository<Person>().Insert(person);
             return CreatedAtAction("AddHumanDTO", new { id = person.Id }, human);
         }
 
@@ -93,13 +93,13 @@ namespace Library.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteHuman([FromRoute] int id)
         {
-            var person = unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault();
+            var person = _unitOfWork.GetRepository<Person>().Get(e => e.Id == id).FirstOrDefault();
 
             if (person == null)
             {
                 return NotFound();
             }
-            unitOfWork.GetRepository<Person>().Delete(person);
+            _unitOfWork.GetRepository<Person>().Delete(person);
 
             return NoContent();
         }

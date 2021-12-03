@@ -9,7 +9,7 @@ namespace Library.Services
 {
     public class BookProfile : Profile
     {
-        BookProfile() 
+		public BookProfile() 
         {
 			CreateMap<Book, BookDto>()
 				.ForMember(dest =>

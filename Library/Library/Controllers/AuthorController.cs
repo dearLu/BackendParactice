@@ -16,13 +16,14 @@ namespace Library.Controllers
     [ApiController]
     public class AuthorController : ControllerBase
     {
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         public AuthorController(IMapper mapper, IUnitOfWork unitOfWork)
         {
-            this.unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
 
         /// <summary>
         /// 2.7.3.1.	Можно получить список всех авторов. (без книг, как и везде, где не указано обратное)
@@ -31,7 +32,7 @@ namespace Library.Controllers
         [HttpGet("getAuthors")]
         public ActionResult<IEnumerable<Author>> GetAuthors()
         {
-            return unitOfWork.GetRepository<Author>().Get().ToList();
+            return _unitOfWork.GetRepository<Author>().Get().ToList();
         }
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace Library.Controllers
             List<AuthorBooksGenresDto> listBooks = new();
 
             Author author = _mapper.Map<Author>(authorDTO);
-            var books = unitOfWork.GetRepository<Book>().Get(e => e.AuthorId == author.Id,
+            var books = _unitOfWork.GetRepository<Book>().Get(e => e.AuthorId == author.Id,
                                                                                 null, 
                                                                                 includeProperties: "Author,Genre");
             foreach (var book in books)
@@ -75,8 +76,8 @@ namespace Library.Controllers
             Author author = _mapper.Map<Author>(authorDTO);
             List<BookDto> books = _mapper.Map<List<BookDto>>(author.Books);
 
-            unitOfWork.GetRepository<Author>().Insert(author);                        
-            unitOfWork.Save();
+            _unitOfWork.GetRepository<Author>().Insert(author);
+            _unitOfWork.Save();
 
             obj.Author = authorDTO;
             obj.Books = books;
@@ -95,7 +96,7 @@ namespace Library.Controllers
         {
             Author author = _mapper.Map<Author>(authorDTO);
 
-            var books = unitOfWork.GetRepository<Book>().Get(e => e.AuthorId == author.Id,
+            var books = _unitOfWork.GetRepository<Book>().Get(e => e.AuthorId == author.Id,
                                                                                 null,
                                                                                 includeProperties: "Author");
 
@@ -105,8 +106,8 @@ namespace Library.Controllers
             }
             else 
             {
-                unitOfWork.GetRepository<Author>().Delete(author.Id);
-                unitOfWork.Save();
+                _unitOfWork.GetRepository<Author>().Delete(author.Id);
+                _unitOfWork.Save();
             }
 
             return Ok();

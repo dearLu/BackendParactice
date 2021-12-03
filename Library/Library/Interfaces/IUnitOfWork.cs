@@ -1,4 +1,6 @@
-﻿using Library.Services;
+﻿using Library.Models;
+using Library.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace Library.Interfaces
 {
-    public interface IUnitOfWork : IDisposable 
+    public interface IUnitOfWork : IDisposable
     {
-        public GenericRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = false) where TEntity : class;
-        public void Save();
-        public void Dispose(bool disposing);
-        public void Dispose();
+        IRepository<TEntity> GetRepository<TEntity>() where TEntity : class;
+        //TContext GetDbContext<TContext>() where TContext : DbContext, IDbContext;
+        void Save();
     }
 }

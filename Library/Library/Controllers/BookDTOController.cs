@@ -20,14 +20,14 @@ namespace Library.Controllers
     [Route("api/[controller]")]
     public class BookDtoController : ControllerBase
     {
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<BookDtoController> _logger;
-        private readonly IMapper mapper;
+        private readonly IMapper _mapper;
         public BookDtoController(ILogger<BookDtoController> logger, IUnitOfWork unitOfWork, IMapper mapper)
         {
-            this.unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
             _logger = logger;
-            this.mapper = mapper;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Library.Controllers
         [HttpGet("getAllBook")]
         public IEnumerable<BookDto> GetAllBook()
         {
-            return mapper.Map<List<BookDto>>(unitOfWork.GetRepository<Book>().Get());
+            return _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>().Get());
         }
 
         /// <summary>
@@ -48,13 +48,13 @@ namespace Library.Controllers
         public IEnumerable<BookDto> GetFilterBooks(bool title = false,bool genre = false,bool descending= false )
         {
             if(descending)
-                 return mapper.Map<List<BookDto>>(unitOfWork.GetRepository<Book>()
+                 return _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>()
                                                         .Get(orderBy: q => q.OrderByDescending(d => d.Name)
                                                                             .ThenByDescending(d => d.Genres)
                                                                             .ThenByDescending(d => d.Author),
                                                                             includeProperties: "Author,Genre"));
 
-                return mapper.Map<List<BookDto>>(unitOfWork.GetRepository<Book>()
+                return _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>()
                                                             .Get(orderBy: q => q.OrderBy(d => d.Name)
                                                                                 .ThenBy(d => d.Genres)
                                                                                 .ThenBy(d => d.Author),
@@ -72,7 +72,7 @@ namespace Library.Controllers
         public IEnumerable<BookDto> GetBookByAuthor([FromRoute] int AuthorId) 
         {
 
-            return mapper.Map<List<BookDto>>(unitOfWork.GetRepository<Book>()
+            return _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>()
                                                         .Get(e => e.Author.Id == AuthorId,
                                                             null,
                                                             includeProperties: "Author,Genre"));
@@ -83,7 +83,7 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetById([FromRoute] int id)
         {
-            var book = mapper.Map<List<BookDto>>(unitOfWork.GetRepository<Book>()
+            var book = _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>()
                                                         .Get(q => q.Id == id))
                                                         .FirstOrDefault();
             if (book == null)
@@ -105,9 +105,9 @@ namespace Library.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<BookDto> AddBookDTO([FromBody] BookDto bookDto)
         {
-            var book = mapper.Map<Book>(bookDto);
-            unitOfWork.GetRepository<Book>().Insert(book);
-            unitOfWork.Save();
+            var book = _mapper.Map<Book>(bookDto);
+            _unitOfWork.GetRepository<Book>().Insert(book);
+            _unitOfWork.Save();
 
             return CreatedAtAction("AddBookDTO", new { id = book.Id }, bookDto);
         }
@@ -121,7 +121,7 @@ namespace Library.Controllers
         public IActionResult DeleteBook([FromRoute] int id)
         {
 
-            var book = unitOfWork.GetRepository<Book>()
+            var book = _unitOfWork.GetRepository<Book>()
                                             .Get(q => q.Id == id)
                                             .FirstOrDefault();
             if (book == null)
@@ -129,7 +129,7 @@ namespace Library.Controllers
                 return NotFound();
             }
 
-            unitOfWork.GetRepository<Book>().Delete(book);
+            _unitOfWork.GetRepository<Book>().Delete(book);
 
             return NoContent();
         }
