@@ -40,12 +40,13 @@ namespace Library
             string connection = Configuration.GetConnectionString("DefaultConnection");
             
             services.AddDbContext<LibraryContext>(options => options.UseSqlServer(connection));
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
-            services.AddTransient<IDbContext, LibraryContext>();
-            services.AddTransient(typeof(IRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IDbContext, LibraryContext>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
             //services.AddTransient(IUnitOfWork, UnitOfWork);
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddMvc();

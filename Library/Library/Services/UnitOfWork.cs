@@ -10,14 +10,11 @@ namespace Library.Services
 {
     public class UnitOfWork: IUnitOfWork 
     {
-        private readonly IDbContext _context;
-        private readonly Dictionary<Type, object> _repositories;
-        private bool _disposed;
-       
-
+        public  IDbContext _context;
+        public  Dictionary<Type, object> _repositories;
+        public bool _disposed;
         public UnitOfWork(IDbContext context)
-        {
-           
+        {          
             _context = context;
             _repositories = new Dictionary<Type, object>();
             _disposed = false;

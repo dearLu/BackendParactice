@@ -30,9 +30,9 @@ namespace Library.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getAuthors")]
-        public ActionResult<IEnumerable<Author>> GetAuthors()
-        {
-            return _unitOfWork.GetRepository<Author>().Get().ToList();
+        public List<AuthorDto> GetAuthors()
+        {           
+            return _mapper.Map<List<AuthorDto>>(_unitOfWork.GetRepository<Author>().Get());
         }
 
         /// <summary>

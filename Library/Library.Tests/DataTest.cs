@@ -65,7 +65,7 @@ namespace Library.Tests
                 FirstName = "Светлана",
                 LastName = "Александрова",
                 MiddleName = "Сергеевна",
-                 Books= books.Where(e=>e.Genres.Any(e=>e.GenreName == "проза")).ToList()
+                Books= books.Where(e=>e.Genres.Any(e=>e.GenreName == "проза")).ToList()
             }
         };
 
@@ -77,7 +77,7 @@ namespace Library.Tests
                 FirstName = "Александр",
                 LastName = "Пушкин",
                 MiddleName = "Сергеевич",
-                Books = books.Where(e=>e.Author.LastName == "Пушкин").ToList()
+                //Books = books.Where(e=>e.Author.LastName == "Пушкин").ToList()
             },
             new Author
             {
@@ -85,7 +85,7 @@ namespace Library.Tests
                 FirstName = "Пелам",
                 LastName = "Вудхаус",
                 MiddleName = "Гренвилл",
-                Books = books.Where(e=>e.Author.LastName == "Вудхаус").ToList()
+                //Books = books.Where(e=>e.Author.LastName == "Вудхаус").ToList()
             },
             new Author
             {
@@ -93,7 +93,7 @@ namespace Library.Tests
                 FirstName = "Джеймс",
                 LastName = "Гарни",
                 MiddleName = "",
-                Books = books.Where(e=>e.Author.LastName == "Гарни").ToList()
+                //Books = books.Where(e=>e.Author.LastName == "Гарни").ToList()
             },
             new Author
             {
@@ -101,7 +101,7 @@ namespace Library.Tests
                 FirstName = "Кобо",
                 LastName = "Абэ",
                 MiddleName = "",
-                Books = books.Where(e=>e.Author.LastName == "Абэ").ToList()
+               // Books = books.Where(e=>e.Author.LastName == "Абэ").ToList()
             },
             new Author
             {
@@ -109,7 +109,7 @@ namespace Library.Tests
                 FirstName = "Исаак",
                 LastName = "Азимов",
                 MiddleName = "Юдович",
-                Books = books.Where(e=>e.Author.LastName == "Азимов").ToList()
+                //Books = books.Where(e=>e.Author.LastName == "Азимов").ToList()
             },
         };
 
