@@ -38,10 +38,10 @@ namespace Library.Tests
         {
             // Arrange
             TestInit();
-            GenreController authorController = new GenreController(mapper, uow.Object);
+            GenreController genreController = new GenreController(mapper, uow.Object);
 
             // Act
-            List<GenreDto> results = authorController.GetAllGenres();
+            List<GenreDto> results = genreController.GetAllGenres();
 
             // Assert
             Assert.Equal(GetDataGenreDto().Count(), results.Count());
@@ -53,10 +53,10 @@ namespace Library.Tests
         {
             // Arrange
             TestInit();
-            GenreController authorController = new GenreController(mapper, uow.Object);
+            GenreController genreController = new GenreController(mapper, uow.Object);
 
             // Act
-            var result = authorController.AddGenre(GetDataGenreDto().ElementAt(0));
+            var result = genreController.AddGenre(GetDataGenreDto().ElementAt(0));
 
             // Assert
             Assert.NotNull(((ObjectResult)result.Result).Value);
@@ -67,10 +67,10 @@ namespace Library.Tests
         {
             // Arrange
             TestInit();
-            GenreController authorController = new GenreController(mapper, uow.Object);
+            GenreController genreController = new GenreController(mapper, uow.Object);
 
             // Act
-            var result = authorController.GetStatictic();
+            var result = genreController.GetStatictic();
 
             // Assert
             Assert.Equal(GetDataStatisticGenreDto().Count(), result.Count());
