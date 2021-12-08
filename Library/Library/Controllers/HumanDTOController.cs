@@ -21,12 +21,10 @@ namespace Library.Controllers
     public class HumanDtoController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<HumanDtoController> _logger;
         private readonly IMapper _mapper;
-        public HumanDtoController(ILogger<HumanDtoController> logger, IUnitOfWork unitOfWork, IMapper mapper)
+        public HumanDtoController(IMapper mapper,IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _logger = logger;
             _mapper = mapper;
         }
 
@@ -35,7 +33,7 @@ namespace Library.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getAll")]
-        public IEnumerable<HumanDto> GetAll()
+        public List<HumanDto> GetAll()
         {
             return _mapper.Map<List<HumanDto>>(_unitOfWork.GetRepository<Person>().Get());
         }
@@ -47,7 +45,7 @@ namespace Library.Controllers
         /// <param name="filter"></param>
         /// <returns></returns>
         [HttpGet("getHuman")]
-        public IEnumerable<HumanDto> GetHuman([FromRoute] string filter)
+        public List<HumanDto> GetHuman([FromRoute] string filter)
         {
             return _mapper.Map<List<HumanDto>>(_unitOfWork.GetRepository<Person>()
                                                      .Get(e => e.FirstName.ToLower() == filter.ToLower()

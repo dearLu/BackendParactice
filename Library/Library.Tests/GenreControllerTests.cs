@@ -29,12 +29,12 @@ namespace Library.Tests
             uow = new Mock<IUnitOfWork>();
             var repo = new Mock<IRepository<Genre>>();
             uow.Setup(x => x.GetRepository<Genre>()).Returns(repo.Object);
-            uow.Setup(x => x.GetRepository<Genre>().Get(It.IsAny<Expression<Func<Genre, bool>>>(), It.IsAny<Func<IQueryable<Genre>, IOrderedQueryable<Genre>>>(), It.IsAny<string>()))
-                                                    .Returns(GetDataGenre());
+            uow.Setup(x => x.GetRepository<Genre>().Get(It.IsAny<Expression<Func<Genre, bool>>>(), It.IsAny<Func<IQueryable<Genre>,                                                     IOrderedQueryable<Genre>>>(), It.IsAny<string>()))
+                                                        .Returns(GetDataGenre());
         }
 
         [Fact]
-        public void GetAllGenresTest()
+        public void GetAllGenres_ShouldReturn_CountGenreDto()
         {
             // Arrange
             TestInit();
@@ -45,11 +45,10 @@ namespace Library.Tests
 
             // Assert
             Assert.Equal(GetDataGenreDto().Count(), results.Count());
-
         }
 
         [Fact]
-        public void AddGenreTest()
+        public void AddGenre_ShouldReturn_NotNull()
         {
             // Arrange
             TestInit();
@@ -63,7 +62,7 @@ namespace Library.Tests
         }
 
         [Fact]
-        public void GetStaticticTest()
+        public void GetStatictic_ShouldReturn_CountStatisticGenreDto()
         {
             // Arrange
             TestInit();
@@ -106,19 +105,16 @@ namespace Library.Tests
                 {
                     Id = 1,
                     GenreName = "роман",
-                    //Books = books.Where(e => e.Genres.Any(e => e.GenreName == "роман")).ToList()
                 },
                 new GenreDto
                 {
                     Id = 2,
                     GenreName = "научная фантастика",
-                    //Books = books.Where(e => e.Genres.Any(e => e.GenreName == "научная фантастика")).ToList()
                 },
                 new GenreDto
                 {
                     Id = 3,
                     GenreName = "проза",
-                    //Books = books.Where(e => e.Genres.Any(e => e.GenreName == "проза")).ToList()
                 }
             };
             return genres;

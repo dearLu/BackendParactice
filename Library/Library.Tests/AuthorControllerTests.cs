@@ -19,15 +19,16 @@ namespace Library.Tests
 {
     public class AuthorControllerTests
     {
+
         [Fact]
-        public void GetAuthorsTest()
+        public void GetAuthors_ShouldReturn_CountAuthor()
         {
-            // Arrange
+            // Arrange           
             var myProfile = new AuthorProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
-            IMapper mapper  = new Mapper(configuration);
+            IMapper mapper = new Mapper(configuration);
             Mock<IUnitOfWork> uow = new Mock<IUnitOfWork>();
-            var repo = new Mock<IRepository<Author>>();          
+            var repo = new Mock<IRepository<Author>>();
             uow.Setup(x => x.GetRepository<Author>()).Returns(repo.Object);
             uow.Setup(x => x.GetRepository<Author>().Get(It.IsAny<Expression<Func<Author, bool>>>(), It.IsAny<Func<IQueryable<Author>, IOrderedQueryable<Author>>>(), It.IsAny<string>()))
                                                     .Returns(GetDataAuthor());
@@ -42,9 +43,9 @@ namespace Library.Tests
         }
 
         [Fact]
-        public void GetAuthorWithBooksTest() 
+        public void GetAuthorWithBooks_ShouldReturn_Count() 
         {
-            // Arrange
+            // Arrange           
             var myProfile = new AuthorProfile();
             var myProfile2 = new BookProfile();
             var myProfile3 = new GenreProfile();
@@ -52,7 +53,7 @@ namespace Library.Tests
             var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(listProfilies));
             IMapper mapper = new Mapper(configuration);
             var repo = new Mock<IRepository<Book>>();
-            Mock<IUnitOfWork>  uow = new Mock<IUnitOfWork>();
+            Mock<IUnitOfWork> uow = new Mock<IUnitOfWork>();
             uow.Setup(x => x.GetRepository<Book>()).Returns(repo.Object);
             uow.Setup(x => x.GetRepository<Book>().Get(It.IsAny<Expression<Func<Book, bool>>>(), It.IsAny<Func<IQueryable<Book>, IOrderedQueryable<Book>>>(), It.IsAny<string>()))
                                                     .Returns(GetDataBook());
@@ -67,11 +68,11 @@ namespace Library.Tests
         }
 
         [Fact]        
-        public void AddAuthorTest() 
+        public void AddAuthor_ShouldReturn_AuthorWithBook() 
         {
             // Arrange
             var myProfile = new AuthorProfile();
-            var myProfile2 = new BookProfile();            
+            var myProfile2 = new BookProfile();
             var listProfilies = new List<Profile>() { myProfile, myProfile2 };
             var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(listProfilies));
             IMapper mapper = new Mapper(configuration);
@@ -90,7 +91,7 @@ namespace Library.Tests
         }
 
         [Fact]
-        public void DeleteAuthorTest_BadRequest()
+        public void DeleteAuthor_ShouldReturn_BadRequest()
         {
             // Arrange
             var myProfile = new AuthorProfile();
@@ -102,7 +103,7 @@ namespace Library.Tests
             var repoBook = new Mock<IRepository<Book>>();
             Mock<IUnitOfWork> uow = new Mock<IUnitOfWork>();
             uow.Setup(x => x.GetRepository<Author>()).Returns(repo.Object);
-            
+
             uow.Setup(x => x.GetRepository<Author>().Get(It.IsAny<Expression<Func<Author, bool>>>(), It.IsAny<Func<IQueryable<Author>, IOrderedQueryable<Author>>>(), It.IsAny<string>()))
                                                     .Returns(GetDataAuthor());
             uow.Setup(x => x.GetRepository<Book>()).Returns(repoBook.Object);

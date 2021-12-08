@@ -47,7 +47,7 @@ namespace Library.Tests
         }
 
         [Fact]
-        public void AddBookTest() 
+        public void AddBook_ShouldReturn_NotNull() 
         {
             // Arrange
             TestInit();
@@ -58,11 +58,10 @@ namespace Library.Tests
 
             // Assert
             Assert.NotNull(result);
-
         }
 
         [Fact]
-        public void DeleteBookTest()
+        public void DeleteBook_ShouldReturn_Ok()
         {
             // Arrange
             TestInit();
@@ -73,11 +72,10 @@ namespace Library.Tests
             var actionResult = bookController.DeleteBook(GetDataBookDto().ElementAt(0).Id);
 
             //Assert
-            Assert.IsType<OkResult>(actionResult);
-            
+            Assert.IsType<OkResult>(actionResult);           
         }
         [Fact]
-        public void PutBookTest()
+        public void PutBook_ShouldReturn_NotNull()
         {
             // Arrange
             TestInit();
@@ -88,11 +86,10 @@ namespace Library.Tests
 
             //Assert            
             Assert.NotNull(result);
-
         }
 
         [Fact]
-        public void GetBooksByAuthorTest()
+        public void GetBooksByAuthor_ShouldReturn_CountAuthor()
         {   
             // Arrange
             TestInit();
@@ -103,13 +100,11 @@ namespace Library.Tests
 
             // Assert
             Assert.Equal(GetDataAuthorDto().ElementAt(1).Books.Count(), result.Count());
-
         }
 
         [Fact]
-        public void GetBooksByGenreTest() 
+        public void GetBooksByGenre_ShouldReturn_NotNull() 
         {
-
             // Arrange
             TestInit();
             BookController bookController = new BookController(mapper, uow.Object);
@@ -212,30 +207,7 @@ namespace Library.Tests
                 }
             };
             return genres;
-        }
-        private List<Author> GetDataAuthor()
-        {
-            var authors = new List<Author>
-            {
-                new Author
-                {
-                    Id = 1,
-                    FirstName = "Александр",
-                    LastName = "Пушкин",
-                    MiddleName = "Сергеевич"
-
-                },
-                new Author
-                {
-                    Id = 2,
-                    FirstName = "Пелам",
-                    LastName = "Вудхаус",
-                    MiddleName = "Гренвилл"
-
-                }
-            };
-            return authors;
-        }
+        }       
         private List<AuthorDto> GetDataAuthorDto()
         {
             var authors = new List<AuthorDto>

@@ -21,12 +21,10 @@ namespace Library.Controllers
     public class BookDtoController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<BookDtoController> _logger;
         private readonly IMapper _mapper;
-        public BookDtoController(ILogger<BookDtoController> logger, IUnitOfWork unitOfWork, IMapper mapper)
+        public BookDtoController(IMapper mapper, IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _logger = logger;
             _mapper = mapper;
         }
 
@@ -35,7 +33,7 @@ namespace Library.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getAllBook")]
-        public IEnumerable<BookDto> GetAllBook()
+        public List<BookDto> GetAllBook()
         {
             return _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>().Get());
         }
@@ -45,7 +43,7 @@ namespace Library.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getFilterBooks")]
-        public IEnumerable<BookDto> GetFilterBooks(bool title = false,bool genre = false,bool descending= false )
+        public List<BookDto> GetFilterBooks(bool descending= false )
         {
             if(descending)
                  return _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>()
@@ -69,7 +67,7 @@ namespace Library.Controllers
         /// <param name="AuthorId"></param>
         /// <returns></returns>
         [HttpGet("getBookByAuthor")]
-        public IEnumerable<BookDto> GetBookByAuthor([FromRoute] int AuthorId) 
+        public List<BookDto> GetBookByAuthor([FromRoute] int AuthorId) 
         {
 
             return _mapper.Map<List<BookDto>>(_unitOfWork.GetRepository<Book>()
