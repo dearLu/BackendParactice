@@ -29,7 +29,9 @@ namespace Library.Tests
             uow = new Mock<IUnitOfWork>();
             var repo = new Mock<IRepository<Genre>>();
             uow.Setup(x => x.GetRepository<Genre>()).Returns(repo.Object);
-            uow.Setup(x => x.GetRepository<Genre>().Get(It.IsAny<Expression<Func<Genre, bool>>>(), It.IsAny<Func<IQueryable<Genre>,                                                     IOrderedQueryable<Genre>>>(), It.IsAny<string>()))
+            uow.Setup(x => x.GetRepository<Genre>().Get(It.IsAny<Expression<Func<Genre, bool>>>(), 
+                                                        It.IsAny<Func<IQueryable<Genre>,                                                                IOrderedQueryable<Genre>>>(),
+                                                        It.IsAny<string>()))
                                                         .Returns(GetDataGenre());
         }
 
