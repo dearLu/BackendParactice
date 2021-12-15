@@ -20,13 +20,13 @@ namespace Library.Tests
     {
         public IMapper mapper;
         public Mock<IUnitOfWork> uow;
-        public void TestInit()
+        public  BookControllerTests()
         {
-            var myProfile = new AuthorProfile();
-            var myProfile2 = new BookProfile();
-            var myProfile3 = new GenreProfile();
-            var listProfilies = new List<Profile>() { myProfile, myProfile2, myProfile3 };
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(listProfilies));
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(new List<Profile>(){
+                                                                                new AuthorProfile(),
+                                                                                new BookProfile(),
+                                                                                new GenreProfile()
+                                                        }));
             mapper = new Mapper(configuration);       
             
             var repo = new Mock<IRepository<Book>>();
@@ -50,7 +50,6 @@ namespace Library.Tests
         public void AddBook_ShouldReturn_NotNull() 
         {
             // Arrange
-            TestInit();
             BookController bookController = new BookController(mapper, uow.Object);
 
             // Act
@@ -64,7 +63,6 @@ namespace Library.Tests
         public void DeleteBook_ShouldReturn_Ok()
         {
             // Arrange
-            TestInit();
             BookController bookController = new BookController(mapper, uow.Object);
             uow.Setup(x => x.GetRepository<Book>().GetById(It.IsAny<object>()))
                                                         .Returns(GetDataBook().ElementAt(0));
@@ -78,7 +76,6 @@ namespace Library.Tests
         public void PutBook_ShouldReturn_NotNull()
         {
             // Arrange
-            TestInit();
             BookController bookController = new BookController(mapper, uow.Object);
 
             // Act

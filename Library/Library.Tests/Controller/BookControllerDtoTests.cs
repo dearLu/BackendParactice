@@ -20,13 +20,13 @@ namespace Library.Tests
     {
         public IMapper mapper;
         public Mock<IUnitOfWork> uow;
-        public void TestInit()
+        public  BookControllerDtoTests()
         {
-            var myProfile = new AuthorProfile();
-            var myProfile2 = new BookProfile();
-            var myProfile3 = new GenreProfile();
-            var listProfilies = new List<Profile>() { myProfile, myProfile2, myProfile3 };
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(listProfilies));
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(new List<Profile>(){
+                                                                                new AuthorProfile(),
+                                                                                new BookProfile(),
+                                                                                new GenreProfile()
+                                                        }));
             mapper = new Mapper(configuration);
             uow = new Mock<IUnitOfWork>();
             var repo = new Mock<IRepository<Book>>();
@@ -42,7 +42,6 @@ namespace Library.Tests
         public void GetAllBook_ShouldReturn_CountBook()
         {
             // Arrange
-            TestInit();
             BookDtoController bookController = new BookDtoController(mapper, uow.Object);
 
             // Act
@@ -56,7 +55,6 @@ namespace Library.Tests
         public void GetFilterBooksetAllBook_ShouldReturn_CountBook()
         {
             // Arrange
-            TestInit();
             BookDtoController bookController = new BookDtoController(mapper, uow.Object);
 
             // Act
@@ -70,7 +68,6 @@ namespace Library.Tests
         public void GetBookByAuthor_ShouldReturn_NotNull()
         {
             // Arrange
-            TestInit();
             BookDtoController bookController = new BookDtoController(mapper, uow.Object);
             uow.Setup(x => x.GetRepository<Book>().GetById(It.IsAny<object>()))
                                             .Returns(GetDataBook().ElementAt(1));
@@ -85,7 +82,6 @@ namespace Library.Tests
         public void GetById_ShouldReturn_Ok() 
         {
             // Arrange
-            TestInit();
             BookDtoController bookController = new BookDtoController(mapper, uow.Object);
             // Act
             var actionResult = bookController.GetById(GetDataBook().ElementAt(1).Id);
@@ -98,7 +94,6 @@ namespace Library.Tests
         public void AddBookDTO_ShouldReturn_NotNull()
         {
             // Arrange
-            TestInit();
             BookDtoController bookController = new BookDtoController(mapper, uow.Object);
 
             // Act
@@ -113,7 +108,6 @@ namespace Library.Tests
         public void DeleteBook_ShouldReturn_NoContent()
         {
             // Arrange
-            TestInit();
             BookDtoController bookController = new BookDtoController(mapper, uow.Object);
             uow.Setup(x => x.GetRepository<Book>().GetById(It.IsAny<object>()))
                                 .Returns(GetDataBook().ElementAt(1));

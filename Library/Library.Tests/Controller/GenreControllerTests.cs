@@ -20,11 +20,9 @@ namespace Library.Tests
     {
         public IMapper mapper;
         public Mock<IUnitOfWork> uow;
-        public void TestInit()
+        public GenreControllerTests()
         {
-
-            var myProfile = new GenreProfile();
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(new GenreProfile()));
             mapper = new Mapper(configuration);
             uow = new Mock<IUnitOfWork>();
             var repo = new Mock<IRepository<Genre>>();
@@ -39,7 +37,6 @@ namespace Library.Tests
         public void GetAllGenres_ShouldReturn_CountGenreDto()
         {
             // Arrange
-            TestInit();
             GenreController genreController = new GenreController(mapper, uow.Object);
 
             // Act
@@ -53,7 +50,6 @@ namespace Library.Tests
         public void AddGenre_ShouldReturn_NotNull()
         {
             // Arrange
-            TestInit();
             GenreController genreController = new GenreController(mapper, uow.Object);
 
             // Act
@@ -67,7 +63,6 @@ namespace Library.Tests
         public void GetStatictic_ShouldReturn_CountStatisticGenreDto()
         {
             // Arrange
-            TestInit();
             GenreController genreController = new GenreController(mapper, uow.Object);
 
             // Act

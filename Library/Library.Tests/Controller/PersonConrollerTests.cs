@@ -22,10 +22,11 @@ namespace Library.Tests
         public Mock<IUnitOfWork> uow;
         public void TestInit()
         {
-            var myProfile = new PersonProfile();
-            var myProfile2 = new BookProfile();
-            var listProfilies = new List<Profile>() { myProfile, myProfile2};
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(listProfilies));
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(new List<Profile>(){
+                                                                                new PersonProfile(),
+                                                                                new BookProfile()
+                                                                                }));
+                                                                                                                           
             mapper = new Mapper(configuration);
 
             var repo = new Mock<IRepository<Person>>();

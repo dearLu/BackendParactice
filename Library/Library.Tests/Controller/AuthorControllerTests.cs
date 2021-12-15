@@ -21,13 +21,13 @@ namespace Library.Tests
     {
         public IMapper mapper;
         public Mock<IUnitOfWork> uow;
-        public void TestInit() 
+        public  AuthorControllerTests() 
         {
-            var myProfile = new AuthorProfile();
-            var myProfile2 = new BookProfile();
-            var myProfile3 = new GenreProfile();
-            var listProfilies = new List<Profile>() { myProfile, myProfile2, myProfile3 };
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(listProfilies));
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(new List<Profile>(){
+                                                                                new AuthorProfile(),
+                                                                                new BookProfile(),
+                                                                                new GenreProfile()
+                                                        }));
             mapper = new Mapper(configuration);
             uow = new Mock<IUnitOfWork>();
             var repo = new Mock<IRepository<Author>>();
@@ -44,8 +44,7 @@ namespace Library.Tests
         [Fact]
         public void GetAuthors_ShouldReturn_CountAuthor()
         {
-            // Arrange           
-            TestInit();
+            // Arrange                     
             AuthorController authorController = new AuthorController(mapper, uow.Object);
 
             // Act
@@ -60,7 +59,6 @@ namespace Library.Tests
         public void GetAuthorWithBooks_ShouldReturn_Count() 
         {
             // Arrange           
-            TestInit();
             AuthorController authorController = new AuthorController(mapper, uow.Object);
 
             // Act
@@ -74,8 +72,7 @@ namespace Library.Tests
         [Fact]        
         public void AddAuthor_ShouldReturn_AuthorWithBook() 
         {
-            // Arrange
-            TestInit();
+            // Arrange           
             AuthorController authorController = new AuthorController(mapper, uow.Object);
 
             // Act
@@ -89,7 +86,6 @@ namespace Library.Tests
         public void DeleteAuthor_ShouldReturn_BadRequest()
         {
             // Arrange
-            TestInit();
             AuthorController authorController = new AuthorController(mapper, uow.Object);
 
             // Act

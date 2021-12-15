@@ -19,10 +19,9 @@ namespace Library.Tests
     {
         public IMapper mapper;
         public Mock<IUnitOfWork> uow;
-        public void TestInit()
+        public  HumanDtoControllerTests()
         {
-            var myProfile = new PersonProfile();
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(new PersonProfile()));
             mapper = new Mapper(configuration);
             uow = new Mock<IUnitOfWork>();
             var repo = new Mock<IRepository<Person>>();
@@ -39,7 +38,6 @@ namespace Library.Tests
         public void GetAll_ShouldReturn_CountHumanDto()
         {
             // Arrange
-            TestInit();
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
@@ -53,7 +51,6 @@ namespace Library.Tests
         public void GetHuman_ShouldReturn_NotNull()
         {
             // Arrange
-            TestInit();
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
@@ -67,7 +64,6 @@ namespace Library.Tests
         public void GetById_ShouldReturn_Ok()
         {
             // Arrange
-            TestInit();
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
@@ -81,7 +77,6 @@ namespace Library.Tests
         public void AddHumanDto_ShouldReturn_NotNull() 
         {
             // Arrange
-            TestInit();
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
@@ -94,8 +89,7 @@ namespace Library.Tests
         [Fact]
         public void DeleteHumanDto_ShouldReturn_NoContent()
         {
-            // Arrange
-            TestInit();
+            // Arrange           
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
