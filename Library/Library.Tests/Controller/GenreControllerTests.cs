@@ -4,21 +4,20 @@ using Library.Interfaces;
 using Library.Models;
 using Library.Models.DTO;
 using Library.Services;
+using Library.Tests.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Library.Tests
 {
     public class GenreControllerTests
     {
-        public IMapper mapper;
+        public readonly IMapper mapper;
         public Mock<IUnitOfWork> uow;
         public GenreControllerTests()
         {
@@ -30,7 +29,7 @@ namespace Library.Tests
             uow.Setup(x => x.GetRepository<Genre>().Get(It.IsAny<Expression<Func<Genre, bool>>>(), 
                                                         It.IsAny<Func<IQueryable<Genre>,                                                                IOrderedQueryable<Genre>>>(),
                                                         It.IsAny<string>()))
-                                                        .Returns(GetDataGenre());
+                                                        .Returns(new TestData().GetDataGenre());
         }
 
         [Fact]
@@ -43,7 +42,7 @@ namespace Library.Tests
             List<GenreDto> results = genreController.GetAllGenres();
 
             // Assert
-            Assert.Equal(GetDataGenreDto().Count(), results.Count());
+            Assert.Equal(3, results.Count());
         }
 
         [Fact]
@@ -53,7 +52,7 @@ namespace Library.Tests
             GenreController genreController = new GenreController(mapper, uow.Object);
 
             // Act
-            var result = genreController.AddGenre(GetDataGenreDto().ElementAt(0));
+            var result = genreController.AddGenre(new TestData().GetDataGenreDto().ElementAt(0));
 
             // Assert
             Assert.NotNull(((ObjectResult)result.Result).Value);
@@ -69,76 +68,8 @@ namespace Library.Tests
             var result = genreController.GetStatictic();
 
             // Assert
-            Assert.Equal(GetDataStatisticGenreDto().Count(), result.Count());
+            Assert.Equal(3, result.Count());
 
-        }
-        private List<Genre> GetDataGenre()
-        {
-            var genres = new List<Genre>
-            {
-                new Genre
-                {
-                    Id = 1,
-                    GenreName = "роман",                    
-                },
-                new Genre
-                {
-                    Id = 2,
-                    GenreName = "научная фантастика",                    
-                },
-                new Genre
-                {
-                    Id = 3,
-                    GenreName = "проза",
-                }
-            };
-            return genres;
-        }
-        private List<GenreDto> GetDataGenreDto()
-        {
-            var genres = new List<GenreDto>
-            {
-                new GenreDto
-                {
-                    Id = 1,
-                    GenreName = "роман",
-                },
-                new GenreDto
-                {
-                    Id = 2,
-                    GenreName = "научная фантастика",
-                },
-                new GenreDto
-                {
-                    Id = 3,
-                    GenreName = "проза",
-                }
-            };
-            return genres;
-        }
-
-        private List<StatisticGenreDto> GetDataStatisticGenreDto()
-        {
-            var genres = new List<StatisticGenreDto>
-            {
-                new StatisticGenreDto
-                {
-                    GenreName = "роман",
-                    Count = 0
-                },
-                new StatisticGenreDto
-                {
-                    GenreName = "научная фантастика",
-                    Count = 0
-                },
-                new StatisticGenreDto
-                {
-                    GenreName = "проза",
-                    Count = 0
-                }
-            };
-
-            return genres;
         }
     }
 }

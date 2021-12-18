@@ -3,21 +3,20 @@ using Library.Controllers;
 using Library.Interfaces;
 using Library.Models;
 using Library.Services;
+using Library.Tests.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Library.Tests
 {
     public class HumanDtoControllerTests
     {
-        public IMapper mapper;
+        public readonly IMapper mapper;
         public Mock<IUnitOfWork> uow;
         public  HumanDtoControllerTests()
         {
@@ -30,7 +29,7 @@ namespace Library.Tests
             uow.Setup(x => x.GetRepository<Person>().Get(It.IsAny<Expression<Func<Person, bool>>>(),
                                                         It.IsAny<Func<IQueryable<Person>,
                                                         IOrderedQueryable<Person>>>(), It.IsAny<string>()))
-                                                        .Returns(GetDataPerson());
+                                                        .Returns(new TestData().GetDataPerson());
 
         }
 
@@ -44,7 +43,7 @@ namespace Library.Tests
             var result = humanController.GetAll();
 
             // Assert
-            Assert.Equal(GetDataHumanDto().Count(), result.Count());
+            Assert.Equal(3, result.Count());
         }
 
         [Fact]
@@ -67,7 +66,7 @@ namespace Library.Tests
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
-            var result = humanController.GetById(GetDataHumanDto().ElementAt(0).Id);
+            var result = humanController.GetById(1);
 
             //Assert
             Assert.IsType<OkObjectResult>(result);
@@ -80,7 +79,7 @@ namespace Library.Tests
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
-            var result = humanController.AddHumanDTO(GetDataHumanDto().ElementAt(0));
+            var result = humanController.AddHumanDTO(new TestData().GetDataHumanDto().ElementAt(0));
 
             // Assert
             Assert.NotNull(result);
@@ -93,79 +92,10 @@ namespace Library.Tests
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
 
             // Act
-            var result = humanController.DeleteHuman(GetDataHumanDto().ElementAt(0).Id);
+            var result = humanController.DeleteHuman(1);
 
             //Assert
             Assert.IsType<NoContentResult>(result);
-        }
-
-        private List<Person> GetDataPerson()
-        {
-            var persons = new List<Person>()
-            {
-                new Person
-                {
-                    Id = 1,
-                    BirthDate = new DateTime(1960, 1, 1),
-                    FirstName = "Александр",
-                    LastName = "Александров",
-                    MiddleName = "Александрович",
-                    Books= new List<Book>()
-                },
-
-                new Person
-                {
-                    Id = 2,
-                    BirthDate = new DateTime(2000, 05, 07),
-                    FirstName = "Петр",
-                    LastName = "Иванов",
-                    MiddleName = "Александрович",
-                },
-
-                new Person
-                {
-                    Id = 3,
-                    BirthDate = new DateTime(1999, 05, 03),
-                    FirstName = "Светлана",
-                    LastName = "Александрова",
-                    MiddleName = "Сергеевна",
-                }
-            };
-            return persons;
-        }
-
-        private List<HumanDto> GetDataHumanDto()
-        {
-            var persons = new List<HumanDto>()
-            {
-                new HumanDto
-                {
-                    Id = 1,
-                    Birthday = new DateTime(1960, 1, 1),
-                    Name = "Александр",
-                    Surname = "Александров",
-                    Patronymic = "Александрович",
-                },
-
-                new HumanDto
-                {
-                    Id = 2,
-                    Birthday = new DateTime(2000, 05, 07),
-                    Name = "Петр",
-                    Surname = "Иванов",
-                    Patronymic = "Александрович",
-                },
-
-                new HumanDto
-                {
-                    Id = 3,
-                    Birthday = new DateTime(1999, 05, 03),
-                    Name = "Светлана",
-                    Surname = "Александрова",
-                    Patronymic = "Сергеевна",
-                }
-            };
-            return persons;
         }
     }
 }

@@ -4,23 +4,22 @@ using Library.Interfaces;
 using Library.Models;
 using Library.Models.DTO;
 using Library.Services;
+using Library.Tests.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Library.Tests
 {
     public class PersonConrollerTests
     {
-        public IMapper mapper;
+        public readonly IMapper mapper;
         public Mock<IUnitOfWork> uow;
-        public void TestInit()
+        public PersonConrollerTests()
         {
             var configuration = new MapperConfiguration(cfg => cfg.AddProfiles(new List<Profile>(){
                                                                                 new PersonProfile(),
@@ -37,7 +36,7 @@ namespace Library.Tests
             uow.Setup(x => x.GetRepository<Person>().Get(It.IsAny<Expression<Func<Person, bool>>>(),
                                                         It.IsAny<Func<IQueryable<Person>,
                                                         IOrderedQueryable<Person>>>(), It.IsAny<string>()))
-                                                        .Returns(GetDataPerson());
+                                                        .Returns(new TestData().GetDataPerson());
 
             uow.Setup(x => x.GetRepository<Book>()).Returns(repoBook.Object);
             uow.Setup(x => x.GetRepository<Book>().Get(It.IsAny<Expression<Func<Book, bool>>>(),
@@ -50,11 +49,10 @@ namespace Library.Tests
         public void AddPerson_ShouldReturn_NotNull() 
         {
             // Arrange
-            TestInit();
             PersonController personController = new PersonController(mapper, uow.Object);
 
             // Act
-            var result = personController.AddPerson(GetDataHumanDto().ElementAt(0));
+            var result = personController.AddPerson(new TestData().GetDataHumanDto().ElementAt(0));
 
             // Assert
             Assert.NotNull(result);
@@ -64,11 +62,10 @@ namespace Library.Tests
         public void UpdatePerson_ShouldReturn_NotNull()
         {
             // Arrange
-            TestInit();
             PersonController personController = new PersonController(mapper, uow.Object);
 
             // Act
-            var result = personController.UpdatePerson(GetDataHumanDto().ElementAt(0));
+            var result = personController.UpdatePerson(new TestData().GetDataHumanDto().ElementAt(0));
 
             // Assert
             Assert.NotNull(result);
@@ -78,12 +75,11 @@ namespace Library.Tests
         public void DeletePerson_ShouldReturn_Ok() 
         {
             // Arrange
-            TestInit();
             PersonController personController = new PersonController(mapper, uow.Object);
             uow.Setup(x => x.GetRepository<Person>().GetById(It.IsAny<object>()))
-                                                        .Returns(GetDataPerson().ElementAt(0));
+                                                        .Returns(new TestData().GetDataPerson().ElementAt(0));
             // Act
-            var actionResult = personController.DeletePerson(GetDataHumanDto().ElementAt(0).Id);
+            var actionResult = personController.DeletePerson(1);
 
             //Assert
             Assert.IsType<OkResult>(actionResult);
@@ -93,11 +89,10 @@ namespace Library.Tests
         public void DeletePersonByName_ShouldReturn_Ok()
         {
             // Arrange
-            TestInit();
             PersonController personController = new PersonController(mapper, uow.Object);
 
             // Act
-            var actionResult = personController.DeletePersonByName(GetDataHumanDto().ElementAt(0));
+            var actionResult = personController.DeletePersonByName(new TestData().GetDataHumanDto().ElementAt(0));
 
             //Assert
             Assert.IsType<OkResult>(actionResult);
@@ -107,50 +102,23 @@ namespace Library.Tests
         public void GetListBook_ShouldReturn_CountAuthorBooksGenresDto()
         {
             // Arrange
-            TestInit();
-            List<AuthorBooksGenresDto> forCheck = new List<AuthorBooksGenresDto>()
-            {
-                new AuthorBooksGenresDto
-                {
-                    Author = new AuthorDto(),
-                    Book =  new BookDto
-                    {
-                        Id = 1,
-                        Title = "Дживс, вы- гений!",
-
-                    },
-                    Genre =new List<GenreDto>()
-                },
-                new AuthorBooksGenresDto
-                {
-                    Author = new AuthorDto(),
-                    Book = new BookDto
-                    {
-                        Id = 2,
-                        Title = "Фамильная честь Вустеров",
-
-                    },
-                    Genre =new List<GenreDto>()
-                }
-            };
             PersonController personController = new PersonController(mapper, uow.Object);
 
             // Act
-            var actionResult = personController.GetListBook(GetDataHumanDto().ElementAt(0).Id);
+            var actionResult = personController.GetListBook(1);
            
             //Assert
-            Assert.Equal(forCheck.Count,actionResult.Count);
+            Assert.Equal(2,actionResult.Count);
         }
 
         [Fact]
         public void PutBookForPerson_ShouldReturn_NotNull()
         {
             // Arrange
-            TestInit();
             PersonController personController = new PersonController(mapper, uow.Object);
 
             // Act
-            var actionResult = personController.PutBookForPerson(GetDataPerson().ElementAt(0).Id, GetDataBookDto().ElementAt(0));
+            var actionResult = personController.PutBookForPerson(1, GetDataBookDto().ElementAt(0));
 
             //Assert
             Assert.NotNull(actionResult);
@@ -160,82 +128,13 @@ namespace Library.Tests
         public void ReturnBook_ShouldReturn_NotNullt()
         {
             // Arrange
-            TestInit();
             PersonController personController = new PersonController(mapper, uow.Object);
 
             // Act
-            var actionResult = personController.ReturnBook(GetDataPerson().ElementAt(0).Id, GetDataBookDto().ElementAt(0));
+            var actionResult = personController.ReturnBook(1, GetDataBookDto().ElementAt(0));
 
             //Assert
             Assert.NotNull(actionResult);
-        }
-        private List<Person> GetDataPerson()
-        {
-            var persons = new List<Person>()
-            {  
-                new Person
-                {
-                    Id = 1,
-                    BirthDate = new DateTime(1960, 1, 1),
-                    FirstName = "Александр",
-                    LastName = "Александров",
-                    MiddleName = "Александрович",
-                    Books= new List<Book>()
-                },
-
-                new Person
-                {
-                    Id = 2,
-                    BirthDate = new DateTime(2000, 05, 07),
-                    FirstName = "Петр",
-                    LastName = "Иванов",
-                    MiddleName = "Александрович",
-                },
-
-                new Person
-                {
-                    Id = 3,
-                    BirthDate = new DateTime(1999, 05, 03),
-                    FirstName = "Светлана",
-                    LastName = "Александрова",
-                    MiddleName = "Сергеевна",
-                }
-            };
-            return persons;
-        }
-
-        private List<HumanDto> GetDataHumanDto()
-        {
-            var persons = new List<HumanDto>()
-            {
-                new HumanDto
-                {
-                    Id = 1,
-                    Birthday = new DateTime(1960, 1, 1),
-                    Name = "Александр",
-                    Surname = "Александров",
-                    Patronymic = "Александрович",
-                },
-
-                new HumanDto
-                {
-                    Id = 2,
-                    Birthday = new DateTime(2000, 05, 07),
-                    Name = "Петр",
-                    Surname = "Иванов",
-                    Patronymic = "Александрович",
-                },
-
-                new HumanDto
-                {
-                    Id = 3,
-                    Birthday = new DateTime(1999, 05, 03),
-                    Name = "Светлана",
-                    Surname = "Александрова",
-                    Patronymic = "Сергеевна",
-                }
-            };
-            return persons;
         }
         private List<Book> GetDataBook()
         {
@@ -245,13 +144,13 @@ namespace Library.Tests
                 {
                     Id = 1,
                     Name = "Дживс, вы- гений!",
-                    Persons = GetDataPerson().Take(1).ToList(),
+                    Persons = new TestData().GetDataPerson().Take(1).ToList(),
                 },
                 new Book
                 {
                     Id = 2,
                     Name = "Фамильная честь Вустеров",
-                    Persons = GetDataPerson().Take(2).ToList(),
+                    Persons = new TestData().GetDataPerson().Take(2).ToList(),
                 }
             };
 

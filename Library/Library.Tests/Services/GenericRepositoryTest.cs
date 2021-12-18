@@ -1,12 +1,7 @@
-﻿using Library.Interfaces;
-using Library.Models;
-using Library.Services;
-using Moq;
-using System;
+﻿using Library.Models;
+using Library.Tests.Helper;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Library.Tests
@@ -35,10 +30,11 @@ namespace Library.Tests
             var readyRepo = helper.GetInMemoryReadRepositoryBook();
 
             //Act
-            readyRepo.Insert(GetDataBook().ElementAt(0));
-            var result = readyRepo.GetById(GetDataBook().ElementAt(0).Id);
+            readyRepo.Insert(new TestData().GetDataBook().ElementAt(0));
+            var result = readyRepo.GetById(1);
+
             //Assert
-            Assert.Equal(GetDataBook().ElementAt(0).Id, result.Id);
+            Assert.Equal(1, result.Id);
         }
 
         [Fact]
@@ -49,9 +45,9 @@ namespace Library.Tests
             var readyRepo = helper.GetInMemoryReadRepositoryBook();
 
             //Act
-            readyRepo.Insert(GetDataBook().ElementAt(0));
-            readyRepo.Delete(GetDataBook().ElementAt(0).Id);
-            var result = readyRepo.GetById(GetDataBook().ElementAt(0).Id);
+            readyRepo.Insert(new TestData().GetDataBook().ElementAt(0));
+            readyRepo.Delete(1);
+            var result = readyRepo.GetById(1);
 
             //Assert
             Assert.Null(result);
@@ -63,7 +59,8 @@ namespace Library.Tests
             //Arrange
             var helper = new TestHelper();
             var readyRepo = helper.GetInMemoryReadRepositoryBook();
-            var book = GetDataBook().ElementAt(3);
+            var book = new TestData().GetDataBook().ElementAt(1);
+
             //Act
             readyRepo.Insert(book);            
             book.Name = "test";
@@ -72,35 +69,6 @@ namespace Library.Tests
 
             //Assert
             Assert.Equal("test", result.Name);
-        }
-        private List<Book> GetDataBook()
-        {
-            var books = new List<Book>()
-            {
-                new Book
-                {
-                    Id = 1,
-                    Name = "Дживс, вы- гений!",
-                    Persons = new List<Person>()
-                },
-                new Book
-                {
-                    Id = 2,
-                    Name = "Фамильная честь Вустеров"
-                },
-                new Book
-                {
-                    Id = 3,
-                    Name = "Фамильная честь Вустеров"
-                },
-                 new Book
-                {
-                    Id = 3,
-                    Name = "Фамильная честь Вустеров"
-                }
-            };
-
-            return books;
         }
     }
 }

@@ -4,22 +4,20 @@ using Library.Interfaces;
 using Library.Models;
 using Library.Models.DTO;
 using Library.Services;
+using Library.Tests.Helper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Library.Tests
 {
     public class AuthorControllerTests
     {
-        public IMapper mapper;
+        public readonly IMapper mapper;
         public Mock<IUnitOfWork> uow;
         public  AuthorControllerTests() 
         {
@@ -33,12 +31,12 @@ namespace Library.Tests
             var repo = new Mock<IRepository<Author>>();
             uow.Setup(x => x.GetRepository<Author>()).Returns(repo.Object);
             uow.Setup(x => x.GetRepository<Author>().Get(It.IsAny<Expression<Func<Author, bool>>>(), It.IsAny<Func<IQueryable<Author>, IOrderedQueryable<Author>>>(), It.IsAny<string>()))
-                                                    .Returns(GetDataAuthor());
+                                                    .Returns(new TestData().GetDataAuthor());
             var repoBook = new Mock<IRepository<Book>>();
             
             uow.Setup(x => x.GetRepository<Book>()).Returns(repoBook.Object);
             uow.Setup(x => x.GetRepository<Book>().Get(It.IsAny<Expression<Func<Book, bool>>>(), It.IsAny<Func<IQueryable<Book>, IOrderedQueryable<Book>>>(), It.IsAny<string>()))
-                                                    .Returns(GetDataBook());
+                                                    .Returns(new TestData().GetDataBook());
 
         }
         [Fact]
@@ -51,7 +49,7 @@ namespace Library.Tests
             List<AuthorDto> results = authorController.GetAuthors();
 
             // Assert
-            Assert.Equal(GetDataAuthorDto().Count(), results.Count());
+            Assert.Equal(2, results.Count());
 
         }
 
@@ -62,10 +60,10 @@ namespace Library.Tests
             AuthorController authorController = new AuthorController(mapper, uow.Object);
 
             // Act
-            List<AuthorBooksGenresDto> results = authorController.GetAuthorWithBooks(GetDataAuthorDto().LastOrDefault());
+            List<AuthorBooksGenresDto> results = authorController.GetAuthorWithBooks(new TestData().GetDataAuthorDto().LastOrDefault());
 
             // Assert
-            Assert.Equal(GetAuthorBooksGenresDto().Count(), results.Count());
+            Assert.Equal(2, results.Count());
 
         }
 
@@ -76,7 +74,7 @@ namespace Library.Tests
             AuthorController authorController = new AuthorController(mapper, uow.Object);
 
             // Act
-            AuthorBooksDto result = authorController.AddAuthor(GetDataAuthorDto().ElementAt(1));
+            AuthorBooksDto result = authorController.AddAuthor(new TestData().GetDataAuthorDto().ElementAt(1));
 
             // Assert
             Assert.NotNull(result);
@@ -89,7 +87,7 @@ namespace Library.Tests
             AuthorController authorController = new AuthorController(mapper, uow.Object);
 
             // Act
-            var actionResult = authorController.DeleteAuthor(GetDataAuthorDto().ElementAt(0));
+            var actionResult = authorController.DeleteAuthor(new TestData().GetDataAuthorDto().ElementAt(0));
 
             //Assert
             var badObjectResult = actionResult as BadRequestObjectResult;
@@ -98,132 +96,5 @@ namespace Library.Tests
             Assert.Equal($"У автора Пушкин есть книги. Нельзя удалить автора, пока есть его книги", badObjectResult.Value);
 
         }
-        private List<Author> GetDataAuthor()
-        {
-            var authors = new List<Author>
-            {
-                new Author
-                {
-                    Id = 1,
-                    FirstName = "Александр",
-                    LastName = "Пушкин",
-                    MiddleName = "Сергеевич"
-                    
-                },
-                new Author
-                {
-                    Id = 2,
-                    FirstName = "Пелам",
-                    LastName = "Вудхаус",
-                    MiddleName = "Гренвилл"
-                  
-                }
-            };
-            return authors;
-        }
-        private List<AuthorDto> GetDataAuthorDto()
-        {
-            var authors = new List<AuthorDto>
-            {
-                new AuthorDto
-                {
-                    Id = 1,
-                    FirstName = "Александр",
-                    LastName = "Пушкин",
-                    MiddleName = "Сергеевич"
-
-                },
-                new AuthorDto
-                {
-                    Id = 2,
-                    FirstName = "Пелам",
-                    LastName = "Вудхаус",
-                    MiddleName = "Гренвилл",
-                    Books = new List<BookDto>()
-                    {
-                        new BookDto
-                        {
-                            Id = 1,
-                            Title = "Дживс, вы- гений!",
-                        },
-                        new BookDto
-                        {
-                            Id = 2,
-                            Title = "Фамильная честь Вустеров",
-                        }
-                    }
-                }
-            };
-
-            return authors;           
-        }
-        private List<Book> GetDataBook() 
-        {
-            var  books = new List<Book>()
-            {
-                new Book
-                {
-                    Id = 1,
-                    Name = "Дживс, вы- гений!",
-                    Author = GetDataAuthor().ElementAt(1)
-                },
-                new Book
-                {
-                    Id = 2,
-                    Name = "Фамильная честь Вустеров",
-                    Author = GetDataAuthor().ElementAt(1)
-                }
-            };
-
-            return books;
-        }
-        private List<BookDto> GetDataBookDto()
-        {
-            var books = new List<BookDto>()
-            {
-                new BookDto
-                {
-                    Id = 1,
-                    Title = "Дживс, вы- гений!",
-                    Author = GetDataAuthorDto().ElementAt(1),
-                    Genres = new List<GenreDto>(),
-                    Persons = new List<HumanDto>(),
-
-                },
-                new BookDto
-                {
-                    Id = 2,
-                    Title = "Фамильная честь Вустеров",
-                    Author = GetDataAuthorDto().ElementAt(1),
-                    Genres = new List<GenreDto>(),
-                    Persons = new List<HumanDto>(),
-                }
-            };
-
-            return books;
-        }
-        private List<AuthorBooksGenresDto> GetAuthorBooksGenresDto() 
-        {
-            var books = new List<AuthorBooksGenresDto>()
-            {
-                new AuthorBooksGenresDto
-                {
-
-                    Author = GetDataAuthorDto().ElementAt(1),
-                    Book = GetDataBookDto().ElementAt(0)
-
-                },
-                new AuthorBooksGenresDto
-                {
-                    Author = GetDataAuthorDto().ElementAt(1),
-                    Book = GetDataBookDto().ElementAt(1)
-
-                }
-            };
-
-            return books;
-
-        }
-
     }
 }
