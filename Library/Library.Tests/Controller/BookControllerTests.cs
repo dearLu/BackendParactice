@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using Library.Controllers;
 using Library.Interfaces;
 using Library.Models;
@@ -32,6 +33,7 @@ namespace Library.Tests
             var repoGenre = new Mock<IRepository<Genre>>();
 
             uow = new Mock<IUnitOfWork>();
+
             uow.Setup(x => x.GetRepository<Book>()).Returns(repo.Object);
             uow.Setup(x => x.GetRepository<Book>().Get(It.IsAny<Expression<Func<Book, bool>>>(),
                                                         It.IsAny<Func<IQueryable<Book>, 
@@ -50,9 +52,13 @@ namespace Library.Tests
         {
             // Arrange
             BookController bookController = new BookController(mapper, uow.Object);
-
+            var fixture = new Fixture();
+            var book = fixture.Build<BookDto>().With(p => p.Genres, new List<GenreDto>())
+                                                .With(p => p.Persons, new List<HumanDto>())
+                                                .With(p => p.Author, new AuthorDto())
+                                                .Create<BookDto>();
             // Act
-            var result = bookController.AddBook(new TestData().GetDataBookDto().LastOrDefault());
+            var result = bookController.AddBook(book);
 
             // Assert
             Assert.NotNull(result);

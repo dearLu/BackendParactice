@@ -1,4 +1,5 @@
-﻿using Library.Models;
+﻿using AutoFixture;
+using Library.Models;
 using Library.Tests.Helper;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,16 @@ namespace Library.Tests
 {
     public class GenericRepositoryTest
     {
+        private Book GetBook()
+        {
+            var fixture = new Fixture();
+            return fixture.Build<Book>().With(p => p.Id, 1)
+                                        .With(p => p.Genres, new List<Genre>())
+                                        .With(p => p.Persons, new List<Person>())
+                                        .With(p => p.Author, new Author())
+                                        .Create<Book>();
+
+        }
         [Fact]
         public void GetRepository_ShouldReturn_ListBook()
         {
@@ -30,7 +41,7 @@ namespace Library.Tests
             var readyRepo = helper.GetInMemoryReadRepositoryBook();
 
             //Act
-            readyRepo.Insert(new TestData().GetDataBook().ElementAt(0));
+            readyRepo.Insert(GetBook());
             var result = readyRepo.GetById(1);
 
             //Assert
@@ -45,7 +56,7 @@ namespace Library.Tests
             var readyRepo = helper.GetInMemoryReadRepositoryBook();
 
             //Act
-            readyRepo.Insert(new TestData().GetDataBook().ElementAt(0));
+            readyRepo.Insert(GetBook());
             readyRepo.Delete(1);
             var result = readyRepo.GetById(1);
 
@@ -59,7 +70,7 @@ namespace Library.Tests
             //Arrange
             var helper = new TestHelper();
             var readyRepo = helper.GetInMemoryReadRepositoryBook();
-            var book = new TestData().GetDataBook().ElementAt(1);
+            var book = GetBook();
 
             //Act
             readyRepo.Insert(book);            

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using Library.Controllers;
 using Library.Interfaces;
 using Library.Models;
@@ -77,9 +78,10 @@ namespace Library.Tests
         {
             // Arrange
             HumanDtoController humanController = new HumanDtoController(mapper, uow.Object);
-
+            var fixture = new Fixture();
+            var human = fixture.Build<HumanDto>().Create<HumanDto>();
             // Act
-            var result = humanController.AddHumanDTO(new TestData().GetDataHumanDto().ElementAt(0));
+            var result = humanController.AddHumanDTO(human);
 
             // Assert
             Assert.NotNull(result);

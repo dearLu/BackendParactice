@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using Library.Controllers;
 using Library.Interfaces;
 using Library.Models;
@@ -33,12 +34,18 @@ namespace Library.Tests
 
             uow = new Mock<IUnitOfWork>();
             uow.Setup(x => x.GetRepository<Person>()).Returns(repo.Object);
+
+            var filter = It.IsAny<Expression<Func<Person, bool>>>();
+            var orderBy = It.IsAny<Func<IQueryable<Person>, IOrderedQueryable<Person>>>();
+            var properties = It.IsAny<string>();
+
             uow.Setup(x => x.GetRepository<Person>().Get(It.IsAny<Expression<Func<Person, bool>>>(),
                                                         It.IsAny<Func<IQueryable<Person>,
                                                         IOrderedQueryable<Person>>>(), It.IsAny<string>()))
                                                         .Returns(new TestData().GetDataPerson());
 
             uow.Setup(x => x.GetRepository<Book>()).Returns(repoBook.Object);
+
             uow.Setup(x => x.GetRepository<Book>().Get(It.IsAny<Expression<Func<Book, bool>>>(),
                                                         It.IsAny<Func<IQueryable<Book>,
                                                         IOrderedQueryable<Book>>>(), It.IsAny<string>()))
@@ -50,9 +57,10 @@ namespace Library.Tests
         {
             // Arrange
             PersonController personController = new PersonController(mapper, uow.Object);
-
+            var fixture = new Fixture();
+            var human = fixture.Build<HumanDto>().Create<HumanDto>();
             // Act
-            var result = personController.AddPerson(new TestData().GetDataHumanDto().ElementAt(0));
+            var result = personController.AddPerson(human);
 
             // Assert
             Assert.NotNull(result);

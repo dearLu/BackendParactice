@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using Library.Controllers;
 using Library.Interfaces;
 using Library.Models;
@@ -72,10 +73,11 @@ namespace Library.Tests
         {
             // Arrange           
             AuthorController authorController = new AuthorController(mapper, uow.Object);
+            var fixture = new Fixture();
+            var author = fixture.Build<AuthorDto>().With(p => p.Books, new List<BookDto>()).Create<AuthorDto>();
 
             // Act
-            AuthorBooksDto result = authorController.AddAuthor(new TestData().GetDataAuthorDto().ElementAt(1));
-
+            AuthorBooksDto result = authorController.AddAuthor(author);
             // Assert
             Assert.NotNull(result);
         }

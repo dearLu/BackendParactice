@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AutoFixture;
+using AutoMapper;
 using Library.Controllers;
 using Library.Interfaces;
 using Library.Models;
@@ -50,9 +51,11 @@ namespace Library.Tests
         {
             // Arrange
             GenreController genreController = new GenreController(mapper, uow.Object);
-
+            var fixture = new Fixture();
+            var genre = fixture.Build<GenreDto>().With(p => p.Books , new List<BookDto>())
+                                    .Create<GenreDto>();
             // Act
-            var result = genreController.AddGenre(new TestData().GetDataGenreDto().ElementAt(0));
+            var result = genreController.AddGenre(genre);
 
             // Assert
             Assert.NotNull(((ObjectResult)result.Result).Value);
