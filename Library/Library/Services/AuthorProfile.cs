@@ -10,7 +10,7 @@ namespace Library.Services
 {
     public class AuthorProfile : Profile
     {
-		AuthorProfile()
+		public AuthorProfile()
 		{
 			CreateMap<Author, AuthorDto>()
 			.ForMember(dest =>

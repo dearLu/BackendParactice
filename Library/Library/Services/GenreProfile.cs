@@ -9,7 +9,7 @@ namespace Library.Services
 {
     public class GenreProfile : Profile
     {
-        GenreProfile()
+        public GenreProfile()
         {
             CreateMap<Genre, GenreDto>()
                 .ForMember(dest =>

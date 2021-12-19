@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Library.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Library.Models
 {
-    public class LibraryContext: DbContext
+    public class LibraryContext: DbContext, IDbContext
     {
         /// <summary>
         /// 2.6	Реализовать репозитории под все сущности кроме референсных 
@@ -15,15 +16,13 @@ namespace Library.Models
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Book> Books { get; set; }       
         public DbSet<Person> Persons { get; set; }
+        //public LibraryContext() { }
         public LibraryContext(DbContextOptions<LibraryContext> options)
             : base(options)
         {
 
         }
 
-        public LibraryContext()
-        {
-        }
 
         /// <summary>
         /// 2.3	Реализовать все связи между таблицами, которые присутствуют в схеме. (использовать при этом только 

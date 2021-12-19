@@ -17,11 +17,11 @@ namespace Library.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         public BookController(IMapper mapper, IUnitOfWork unitOfWork)
         {
-            this.unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -37,7 +37,7 @@ namespace Library.Controllers
 
             Book book = _mapper.Map<Book>(bookDTO);
 
-            unitOfWork.GetRepository<Book>().Insert(book);
+            _unitOfWork.GetRepository<Book>().Insert(book);
 
             return CreatedAtAction("AddBook", new { id = book.Id }, book);
         }
@@ -52,7 +52,7 @@ namespace Library.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = unitOfWork.GetRepository<Book>().GetByID(id);
+            var book = _unitOfWork.GetRepository<Book>().GetById(id);
             if (book == null)
             {
                 return NotFound();
@@ -60,8 +60,8 @@ namespace Library.Controllers
 
             if (book.Persons.Count() == 0)
             {
-                unitOfWork.GetRepository<Book>().Delete(id);
-                unitOfWork.Save();
+                _unitOfWork.GetRepository<Book>().Delete(id);
+                _unitOfWork.Save();
             }
             else
             {
@@ -84,7 +84,7 @@ namespace Library.Controllers
         public AuthorBooksGenresDto PutBook(BookDto bookDTO)
         {
             Book book = _mapper.Map<Book>(bookDTO);
-            Genre genre = unitOfWork.GetRepository<Genre>().Get(e => !book.Genres.Contains(e)).FirstOrDefault();
+            Genre genre = _unitOfWork.GetRepository<Genre>().Get(e => !book.Genres.Contains(e)).FirstOrDefault();
            
             if (book.Genres.Any(e => e.Id == genre.Id))
             {
@@ -96,9 +96,9 @@ namespace Library.Controllers
                 book.Genres.Add(genre);
                 genre.Books.Add(book);
             }
-            unitOfWork.GetRepository<Genre>().Update(genre);
-            unitOfWork.GetRepository<Book>().Update(book);
-            unitOfWork.Save();
+            _unitOfWork.GetRepository<Genre>().Update(genre);
+            _unitOfWork.GetRepository<Book>().Update(book);
+            _unitOfWork.Save();
 
             AuthorBooksGenresDto obj = new();
             obj.Author = _mapper.Map<AuthorDto>(book.Author);
@@ -119,7 +119,7 @@ namespace Library.Controllers
         public IEnumerable<Book> GetBooksByAuthor([FromBody] AuthorDto authorDTO)
         {
             Author author = _mapper.Map<Author>(authorDTO);
-            var books = unitOfWork.GetRepository<Book>().Get(e => e.Author.FirstName.ToLower() == author.FirstName.ToLower()
+            var books = _unitOfWork.GetRepository<Book>().Get(e => e.Author.FirstName.ToLower() == author.FirstName.ToLower()
                                                             && e.Author.LastName.ToLower() == author.LastName.ToLower()
                                                             && e.Author.MiddleName.ToLower() == author.MiddleName.ToLower(), 
                                                             null, 
@@ -140,7 +140,7 @@ namespace Library.Controllers
             List<AuthorBooksGenresDto> listBooks = new();
             Genre genre = _mapper.Map<Genre>(genreDTO);
 
-            var books = unitOfWork.GetRepository<Book>().Get(e => e.Genres.Any(e => e.Id == genre.Id),
+            var books = _unitOfWork.GetRepository<Book>().Get(e => e.Genres.Any(e => e.Id == genre.Id),
                                                             null,
                                                             includeProperties:"Author,Genre");
             foreach (var book in books)
