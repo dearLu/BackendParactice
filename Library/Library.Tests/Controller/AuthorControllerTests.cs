@@ -31,6 +31,7 @@ namespace Library.Tests
             uow = new Mock<IUnitOfWork>();
             var repo = new Mock<IRepository<Author>>();
             uow.Setup(x => x.GetRepository<Author>()).Returns(repo.Object);
+           
             uow.Setup(x => x.GetRepository<Author>().Get(It.IsAny<Expression<Func<Author, bool>>>(), It.IsAny<Func<IQueryable<Author>, IOrderedQueryable<Author>>>(), It.IsAny<string>()))
                                                     .Returns(new TestData().GetDataAuthor());
             var repoBook = new Mock<IRepository<Book>>();

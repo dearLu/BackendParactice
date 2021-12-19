@@ -35,10 +35,6 @@ namespace Library.Tests
             uow = new Mock<IUnitOfWork>();
             uow.Setup(x => x.GetRepository<Person>()).Returns(repo.Object);
 
-            var filter = It.IsAny<Expression<Func<Person, bool>>>();
-            var orderBy = It.IsAny<Func<IQueryable<Person>, IOrderedQueryable<Person>>>();
-            var properties = It.IsAny<string>();
-
             uow.Setup(x => x.GetRepository<Person>().Get(It.IsAny<Expression<Func<Person, bool>>>(),
                                                         It.IsAny<Func<IQueryable<Person>,
                                                         IOrderedQueryable<Person>>>(), It.IsAny<string>()))
